@@ -1,0 +1,24 @@
+wifi:
+  domain: !env_var WIFI_DOMAIN
+  ssid: !env_var WIFI_SSID
+  password: !env_var WIFI_PASSWORD
+  # Optional manual IP
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Livingroom Fallback Hotspot"
+    password: !env_var WIFI_FALLBACK_PASSWORD
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+mqtt:
+  broker: !env_var MQTT_ENDPOINT
+  port: 31705
+  username: !env_var MQTT_USERNAME
+  password: !env_var MQTT_PASSWORD
+ota:
