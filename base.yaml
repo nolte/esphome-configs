@@ -18,7 +18,7 @@ logger:
 api:
 mqtt:
   broker: !env_var MQTT_ENDPOINT
-  port: 31705
+  port: !env_var MQTT_PORT
   username: !env_var MQTT_USERNAME
   password: !env_var MQTT_PASSWORD
 ota:
