@@ -1,0 +1,29 @@
+# include the base config like wifi and logging
+<<: !include base.yaml
+
+esphome:
+  name: floortracker
+  comment: Living room ESP32 controller
+  platform: ESP32
+  board: esp32dev
+
+#esp32_ble_tracker:
+esp32_ble_tracker:
+  scan_parameters:
+    active: true
+
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal Sensor"
+    update_interval: 60s
+
+binary_sensor:
+  - platform: status
+    name: "FloorTracker Status"
+  - platform: ble_presence
+    mac_address: !env_var BT_BEACON_01
+    name: "jinou_beacon_01"
+  - platform: ble_presence
+    mac_address: !env_var BT_BEACON_02
+    name: "jinou_beacon_02"   
