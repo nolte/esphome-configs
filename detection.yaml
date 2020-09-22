@@ -3,7 +3,7 @@
 
 esphome:
   name: floortracker
-  comment: Living room ESP32 controller
+  comment: Detection ESP32 controller
   platform: ESP32
   board: esp32dev
 
@@ -11,7 +11,6 @@ esphome:
 esp32_ble_tracker:
   scan_parameters:
     active: true
-
 
 sensor:
   - platform: wifi_signal
