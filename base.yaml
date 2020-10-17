@@ -22,3 +22,9 @@ mqtt:
   username: !env_var MQTT_USERNAME
   password: !env_var MQTT_PASSWORD
 ota:
+
+# Example configuration entry
+web_server:
+
+# Activates prometheus /metrics endpoint
+prometheus:

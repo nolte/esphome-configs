@@ -11,6 +11,7 @@ esphome:
 esp32_ble_tracker:
   scan_parameters:
     active: true
+    interval: 160ms
 
 sensor:
   - platform: wifi_signal
