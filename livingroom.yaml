@@ -6,8 +6,9 @@ esphome:
   platform: ESP8266
   board: nodemcuv2
 
-#esp32_ble_tracker:
 sensor:
+  - platform: status
+    name: "livingroom Status"
   - platform: dht
     pin: D2
     model: AM2302
