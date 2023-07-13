@@ -15,15 +15,20 @@ captive_portal:
 logger:
 
 # Enable Home Assistant API
+# https://esphome.io/components/api.html
 api:
+
+# https://esphome.io/components/mqtt.html
 mqtt:
   broker: !env_var MQTT_ENDPOINT
   port: !env_var MQTT_PORT
   username: !env_var MQTT_USERNAME
   password: !env_var MQTT_PASSWORD
+
+# https://esphome.io/components/ota.html
 ota:
 
-# Example configuration entry
+# https://esphome.io/components/web_server.html
 web_server:
 
 # Activates prometheus /metrics endpoint
