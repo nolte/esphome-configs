@@ -1,0 +1,47 @@
+# include the base config like wifi and logging
+<<: !include base.yaml
+
+substitutions:
+  name: poc-esp32-dht
+  id: poc_esp32_dht
+  friendly_name: ${name} Sensor
+  friendly_name_temp: ${name} Temperature
+  friendly_name_humidity: ${name} Humidity
+
+esphome:
+  name: ${name}
+
+# https://esphome.io/devices/esp32.html
+esp32:
+  board: nodemcu-32s
+
+binary_sensor:
+  # https://esphome.io/components/binary_sensor/status.html
+  - platform: status
+    name: "livingroom Status"
+
+sensor:
+  # https://esphome.io/components/sensor/dht.html?highlight=dht
+  - platform: dht
+    pin: GPIO23 #GPIO5
+    temperature:
+      name: "${friendly_name_temp} DHT11"
+      id: ${id}_temperature_dht11
+    humidity:
+      name: "${friendly_name_humidity} DHT11"
+      id: ${id}_humidity_dht11
+    model: DHT11
+    update_interval: 60s
+
+  - platform: dht
+    pin: GPIO22
+    # model: AM2302
+    
+    temperature:
+      name: "${friendly_name_temp} DHT22"
+      id: ${id}_temperature_dht22
+    humidity:
+      name: "${friendly_name_humidity} DHT22"
+      id: ${id}_humidity_dht22
+    update_interval: 60s
+
