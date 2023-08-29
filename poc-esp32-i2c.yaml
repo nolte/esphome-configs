@@ -1,0 +1,39 @@
+# include the base config like wifi and logging
+<<: !include base.yaml
+
+substitutions:
+  name: poc-esp32-dht
+  id: poc_esp32_dht
+  friendly_name: ${name} Sensor
+  friendly_name_temp: ${name} Temperature
+  friendly_name_humidity: ${name} Humidity
+
+esphome:
+  name: ${name}
+
+# https://esphome.io/devices/esp32.html
+esp32:
+  board: nodemcu-32s
+
+# Example configuration entry for ESP32
+i2c:
+  sda: 21
+  scl: 22
+  scan: true
+  id: bus_a
+
+binary_sensor:
+  # https://esphome.io/components/binary_sensor/status.html
+  - platform: status
+    name: "${friendly_name} Status"
+
+sensor:
+
+  - platform: aht10
+    temperature:
+      name: "${friendly_name_temp} DHT20"
+      id: ${id}_temperature_dht20
+    humidity:
+      name: "${friendly_name_humidity} DHT20"
+      id: ${id}_humidity_dht20
+    update_interval: 60s
