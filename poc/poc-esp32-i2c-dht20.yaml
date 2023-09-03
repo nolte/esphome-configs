@@ -1,0 +1,18 @@
+# include the base config like wifi and logging
+<<: !include ../include-base.yaml
+<<: !include ../include-esp32.yaml
+<<: !include ../include-esp32-i2c.yaml
+<<: !include ./poc.yaml
+
+esphome:
+  name: ${name}
+
+sensor:
+  - platform: aht10
+    temperature:
+      name: "${friendly_name_temp} DHT20"
+      id: ${id}_temperature_dht20
+    humidity:
+      name: "${friendly_name_humidity} DHT20"
+      id: ${id}_humidity_dht20
+    update_interval: 60s

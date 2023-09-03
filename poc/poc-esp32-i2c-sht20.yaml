@@ -1,0 +1,69 @@
+# include the base config like wifi and logging
+<<: !include ../include-base.yaml
+
+substitutions:
+  name: poc-esp32
+  id: poc_esp32
+  friendly_name: ${name} Sensor
+  friendly_name_temp: ${name} Temperature
+  friendly_name_humidity: ${name} Humidity
+
+esphome:
+  name: ${name}
+
+  libraries:
+    - "Wire"
+    - "uFire SHT20"
+    - "ArduinoJson"
+  includes:
+    - include/sht20.h
+
+# https://esphome.io/devices/esp32.html
+esp32:
+  board: nodemcu-32s
+
+# Example configuration entry for ESP32
+i2c:
+  sda: 21
+  scl: 22
+  scan: true
+  id: bus_a
+
+binary_sensor:
+  # https://esphome.io/components/binary_sensor/status.html
+  - platform: status
+    name: "${friendly_name} Status"
+
+sensor:
+
+  - platform: custom
+    lambda: |-
+      auto sht20 = new SHT20();
+      App.register_component(sht20);
+      return {sht20->temperature_sensor, sht20->humidity_sensor, sht20->vpd_sensor, sht20->dew_point_sensor};
+    sensors:
+      - name: "Temperature"
+        id: sensor_temperature
+        unit_of_measurement: °C
+        accuracy_decimals: 2
+      - name: "Humidity"
+        id: sensor_humidity
+        unit_of_measurement: "%"
+        accuracy_decimals: 2
+      - name: "Vapour-pressure deficit"
+        id: sensor_vpd
+        unit_of_measurement: "kPa"
+        accuracy_decimals: 2
+      - name: "Dew point"
+        id: sensor_dew_point
+        unit_of_measurement: °C
+        accuracy_decimals: 2
+
+#   - platform: aht10
+#     temperature:
+#       name: "${friendly_name_temp} DHT20"
+#       id: ${id}_temperature_dht20
+#     humidity:
+#       name: "${friendly_name_humidity} DHT20"
+#       id: ${id}_humidity_dht20
+#     update_interval: 60s
