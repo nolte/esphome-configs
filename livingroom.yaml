@@ -1,5 +1,5 @@
 # include the base config like wifi and logging
-<<: !include-base base.yaml
+<<: !include-base base.yaml.snipped
 
 esphome:
   name: livingroom
