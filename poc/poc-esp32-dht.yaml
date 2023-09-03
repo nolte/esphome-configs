@@ -1,6 +1,6 @@
 # include the base config like wifi and logging
-<<: !include ../include-base.yaml
-<<: !include ../include-esp32.yaml
+<<: !include ../include-base.yaml.snipped
+<<: !include ../include-esp32.yaml.snipped
 <<: !include ./poc.yaml
 esphome:
   name: ${name}

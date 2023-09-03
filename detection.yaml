@@ -1,5 +1,5 @@
 # include the base config like wifi and logging
-<<: !include include-base.yaml
+<<: !include include-base.yaml.snipped
 
 esphome:
   name: floortracker
