@@ -1,0 +1,26 @@
+# include the base config like wifi and logging
+<<: !include ../include-base.yaml
+<<: !include ../include-esp32.yaml
+<<: !include ../include-esp32-i2c.yaml
+<<: !include ./poc.yaml
+
+esphome:
+  name: ${name}
+  includes:
+    - ../include/somose.h
+
+# https://esphome.io/devices/esp32.html
+sensor:
+  - platform: custom
+    id: somosesensor1
+    lambda: |-
+      auto somose1 = new SoMoSe(0x55);
+      App.register_component(somose1);
+      return {somose1->temperature_sensor, somose1->moisture_sensor};
+    sensors:
+      - name: "somose1_temperature"
+        unit_of_measurement: °C
+        accuracy_decimals: 0
+      - name: "somose1_moisture"
+        unit_of_measurement: '%'
+        accuracy_decimals: 0

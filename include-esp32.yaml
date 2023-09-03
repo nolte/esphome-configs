@@ -1,0 +1,4 @@
+
+# https://esphome.io/devices/esp32.html
+esp32:
+  board: nodemcu-32s

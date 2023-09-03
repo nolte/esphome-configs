@@ -1,0 +1,15 @@
+# include the base config like wifi and logging
+
+
+substitutions:
+  name: poc-esp32
+  id: poc_esp32
+  friendly_name: ${name} Sensor
+  friendly_name_temp: ${name} Temperature
+  friendly_name_humidity: ${name} Humidity
+
+
+binary_sensor:
+  # https://esphome.io/components/binary_sensor/status.html
+  - platform: status
+    name: "${friendly_name} Status"

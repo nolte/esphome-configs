@@ -1,0 +1,25 @@
+# include the base config like wifi and logging
+<<: !include ../include-base.yaml
+<<: !include ../include-esp32.yaml
+<<: !include ./poc.yaml
+
+esphome:
+  name: ${name}
+
+sensor:
+   - platform: adc
+     pin: GPIO36
+     name: "Soil Moisture"
+     update_interval: 2s
+    #  unit_of_measurement: "%"
+    #  #attenuation: 11db (only on ESP32)
+    #  filters:
+    #  - median:
+    #      window_size: 7
+    #      send_every: 4
+    #      send_first_at: 1
+    #  - calibrate_linear:
+    #      - 1.3 -> 100
+    #      - 2.5 -> 0
+    #  - lambda: if (x < 1) return 0; else return (x);
+     accuracy_decimals: 0    
