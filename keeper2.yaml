@@ -1,0 +1,78 @@
+# include the base config like wifi and logging
+<<: !include ./include-base.yaml.snipped
+<<: !include ./include-esp8266.yaml.snipped
+<<: !include ./include-esp8266-i2c.yaml.snipped
+
+substitutions:
+  name: keeper-02
+  id: gateway_keeper_02
+  friendly_name: ${name} Sensor
+  friendly_name_temp: ${name} Temperature
+  friendly_name_humidity: ${name} Humidity
+
+
+esphome:
+  name: ${name}
+  #includes:
+  #  - ./include/somose.h
+
+
+binary_sensor:
+  # https://esphome.io/components/binary_sensor/status.html
+  - platform: status
+    name: "${friendly_name} Status"
+    id: ${id}_status
+
+sensor:
+  - platform: aht10
+    temperature:
+      name: "${friendly_name_temp} DHT20"
+      id: ${id}_temperature
+    humidity:
+      name: "${friendly_name_humidity} DHT20"
+      id: ${id}_humidity
+    update_interval: 10s
+  
+  - platform: bh1750
+    name: "BH1750 Illuminance"
+    address: 0x23
+    update_interval: 30s
+
+  - platform: tcs34725
+    red_channel:
+      name: "TCS34725 Red Channel"
+      id: ${id}_red_channel
+    green_channel:
+      name: "TCS34725 Green Channel"
+      id: ${id}_green_channel
+    blue_channel:
+      name: "TCS34725 Blue Channel"
+      id: ${id}_blue_channel
+    clear_channel:
+      name: "TCS34725 Clear Channel"
+      id: ${id}_clear_channel
+    illuminance:
+      name: "TCS34725 Illuminance"
+      id: ${id}_illuminance
+    color_temperature:
+      name: "TCS34725 Color Temperature"
+      id: ${id}_color_temperature
+    glass_attenuation_factor: 1.0
+    address: 0x29
+    update_interval: 60s    
+#   - platform: custom
+#     id: ${id}_soil_01
+#     lambda: |-
+#       auto somose1 = new SoMoSe(0x55);
+#       App.register_component(somose1);
+#       return {somose1->temperature_sensor, somose1->moisture_sensor};
+#     sensors:
+#       - name: "soil_temperature"
+#         unit_of_measurement: °C
+#         accuracy_decimals: 0
+#         id: ${id}_soil_01_temperature
+#       - name: "soil_moisture"
+#         unit_of_measurement: '%'
+#         accuracy_decimals: 0
+#         id: ${id}_soil_01_moisture
+    

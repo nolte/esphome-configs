@@ -1,0 +1,82 @@
+# include the base config like wifi and logging
+<<: !include ./include-base.yaml.snipped
+# <<: !include ./include-esp32.yaml.snipped
+
+
+substitutions:
+  name: cam-02
+  id: cam_02
+
+esphome:
+  name: ${name}
+
+esp32:
+  board: esp32dev #esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+  level: VERBOSE
+  tx_buffer_size: 256
+
+
+esp32_camera:
+  id: ${id}
+  name: ${name}
+  external_clock:
+    pin: GPIO0
+    frequency: 10MHz
+  i2c_pins:
+    sda: GPIO26
+    scl: GPIO27
+  data_pins: [GPIO5, GPIO18, GPIO19, GPIO21, GPIO36, GPIO39, GPIO34, GPIO35]
+  vsync_pin: GPIO25
+  href_pin: GPIO23
+  pixel_clock_pin: GPIO22
+  power_down_pin: GPIO32
+  resolution: 800x600
+  jpeg_quality: 10  # max. 63
+  max_framerate: 1.0fps
+  idle_framerate: 0.2fps
+  vertical_flip: true
+  horizontal_mirror: false
+  brightness: 2 # -2 to 2
+  contrast: 1 # -2 to 2
+  special_effect: none
+  # exposure settings
+  aec_mode: auto
+  aec2: false
+  ae_level: 0
+  aec_value: 300
+  # gain settings
+  agc_mode: auto
+  agc_gain_ceiling: 2x
+  agc_value: 0
+  # white balance setting
+  wb_mode: auto
+output:
+# white LED
+  - platform: ledc
+    channel: 2
+    pin: GPIO4
+    id: ${id}_espCamLED
+# red status light
+  - platform: gpio
+    pin:
+      number: GPIO33
+      inverted: True
+    id: ${id}_gpio_33
+light:
+  - platform: monochromatic
+    output: ${id}_espCamLED
+    name: ${id}_esp-cam light
+  - platform: binary
+    output: ${id}_gpio_33
+    name: ${id}_esp-cam led
+switch:
+  - platform: restart
+    name: ${id}_esp-cam restart
+binary_sensor:
+  - platform: status
+    name: ${id}_esp-cam status

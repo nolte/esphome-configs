@@ -1,0 +1,78 @@
+# include the base config like wifi and logging
+<<: !include ./include-base.yaml.snipped
+<<: !include ./include-esp32.yaml.snipped
+<<: !include ./include-esp32-i2c.yaml.snipped
+
+substitutions:
+  name: keeper-01
+  id: gateway_keeper_01
+  friendly_name: ${name} Sensor
+  friendly_name_temp: ${name} Temperature
+  friendly_name_humidity: ${name} Humidity
+
+
+esphome:
+  name: ${name}
+  includes:
+    - ./include/somose.h
+
+
+binary_sensor:
+  # https://esphome.io/components/binary_sensor/status.html
+  - platform: status
+    name: "${friendly_name} Status"
+    id: ${id}_status
+
+sensor:
+#   - platform: aht10
+#     temperature:
+#       name: "${friendly_name_temp} DHT20"
+#       id: ${id}_temperature
+#     humidity:
+#       name: "${friendly_name_humidity} DHT20"
+#       id: ${id}_humidity
+#     update_interval: 10s
+
+  - platform: custom
+    id: ${id}_soil_01
+    lambda: |-
+        auto somose1 = new SoMoSe(0x55);
+        App.register_component(somose1);
+        return {somose1->temperature_sensor, somose1->moisture_sensor};
+      
+    sensors:
+      - name: "soil_temperature_01"
+        unit_of_measurement: °C
+        accuracy_decimals: 0
+        id: ${id}_soil_01_temperature
+  
+      - name: "soil_moisture_01"
+        unit_of_measurement: '%'
+        accuracy_decimals: 0
+        id: ${id}_soil_01_moisture
+        # filters:
+        # - sliding_window_moving_average:
+        #     window_size: 3
+        #     send_every: 3
+
+
+  - platform: custom
+    id: ${id}_soil_02
+    
+    lambda: |-
+      auto somose2 = new SoMoSe(0x56);
+      App.register_component(somose2);
+      return {somose2->temperature_sensor, somose2->moisture_sensor};
+    sensors:
+      - name: "soil_temperature_02"
+        unit_of_measurement: °C
+        accuracy_decimals: 0
+        id: ${id}_soil_02_temperature
+      - name: "soil_moisture_02"
+        unit_of_measurement: '%'
+        accuracy_decimals: 0
+        id: ${id}_soil_02_moisture
+        # filters:
+        # - sliding_window_moving_average:
+        #     window_size: 3
+        #     send_every: 3

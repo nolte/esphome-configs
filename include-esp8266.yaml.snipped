@@ -1,0 +1,4 @@
+
+# https://esphome.io/components/esp8266.html
+esp8266:
+  board: nodemcuv2
