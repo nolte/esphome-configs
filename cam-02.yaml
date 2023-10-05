@@ -11,19 +11,18 @@ esphome:
   name: ${name}
 
 esp32:
-  board: esp32dev #esp32dev
+  board: esp32cam #esp32dev
   framework:
     type: arduino
 
 # Enable logging
-logger:
-  level: VERBOSE
-  tx_buffer_size: 256
-
+# logger:
+#   level: VERBOSE
+#   tx_buffer_size: 256
 
 esp32_camera:
-  id: ${id}
   name: ${name}
+  id: ${id}
   external_clock:
     pin: GPIO0
     frequency: 10MHz
@@ -55,6 +54,7 @@ esp32_camera:
   agc_value: 0
   # white balance setting
   wb_mode: auto
+
 output:
 # white LED
   - platform: ledc
@@ -70,13 +70,17 @@ output:
 light:
   - platform: monochromatic
     output: ${id}_espCamLED
-    name: ${id}_esp-cam light
+    name: esp-cam light
+    id: ${id}_light
   - platform: binary
     output: ${id}_gpio_33
-    name: ${id}_esp-cam led
+    name: esp-cam led
+    id: ${id}_led
 switch:
   - platform: restart
-    name: ${id}_esp-cam restart
+    name: esp-cam restart
+    id: ${id}_restart
 binary_sensor:
   - platform: status
-    name: ${id}_esp-cam status
+    name: esp-cam status
+    id: ${id}_status
