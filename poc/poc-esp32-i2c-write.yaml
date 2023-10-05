@@ -1,0 +1,33 @@
+# include the base config like wifi and logging
+<<: !include ../include-base.yaml.snipped
+<<: !include ../include-esp32.yaml.snipped
+<<: !include ../include-esp32-i2c.yaml.snipped
+<<: !include ./poc.yaml
+
+esphome:
+  name: ${name}
+  includes:
+    - ../include/my_write_i2c.h
+number:
+  - platform: template
+    name: "Input 1"
+    optimistic: true
+    min_value: 1
+    max_value: 255
+    initial_value: 20
+    step: 1
+    mode: box
+    id: input_1
+    icon: "mdi:counter"
+# https://esphome.io/devices/esp32.html
+
+
+sensor:
+- platform: custom
+  lambda: |-
+    auto my_sensor = new MyCustomComponent();
+    App.register_component(my_sensor);
+    return {my_sensor -> temperature_sensor};
+
+  sensors:
+    name: "My Custom Sensor"
