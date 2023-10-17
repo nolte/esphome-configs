@@ -1,0 +1,11 @@
+# include the base config like wifi and logging
+<<: !include ./include-base.yaml.snipped
+<<: !include ./include-gosund-p1-stripe.yaml.snipped
+
+substitutions:
+  name: gosund-p1-stripe-01
+  id: gosund_p1_stripe_01
+  # Higher value gives lower watt readout
+  current_res: "0.00280"
+  # Lower value gives lower voltage readout
+  voltage_div: "775"
