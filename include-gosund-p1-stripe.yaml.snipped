@@ -56,7 +56,6 @@ sensor:
       icon: mdi:flash-outline
       filters:
         - lambda: return x * 2.34245;
-    update_interval: 3s
   - platform: total_daily_energy
     name: "${name} - Dagverbruik"
     power_id: "${id}_Wattage"
