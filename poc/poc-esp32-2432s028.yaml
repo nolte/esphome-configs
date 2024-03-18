@@ -3,7 +3,6 @@
 
 # https://github.com/BOlaerts/ESP32-2432s028/tree/main/ESPHome
 
-
 substitutions:
   name: poc-esp32-2432s028
   id: poc_esp32_2432s028
