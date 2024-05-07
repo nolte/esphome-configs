@@ -4,3 +4,6 @@ i2c:
   scl: 22
   scan: true
   id: bus_a
+  frequency: 100kHz
+  #frequency: 50kHz
+  #timeout: 2s
