@@ -4,3 +4,4 @@ i2c:
   scl: GPIO5
   scan: true
   id: bus_a
+  frequency: 100kHz

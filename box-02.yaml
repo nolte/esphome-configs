@@ -1,0 +1,98 @@
+# include the base config like wifi and logging
+<<: !include ./include-base.yaml.snipped
+<<: !include ./include-esp8266.yaml.snipped
+<<: !include ./include-esp8266-i2c.yaml.snipped
+
+substitutions:
+  name: box-02
+  friendly_name: box_02
+  intervall: 15s
+
+esphome:
+  name: ${name}
+
+external_components:
+  - source: ./my_components
+    components: [ somose ]
+
+
+tca9548a:
+  - address: 0x70
+    id: multiplex0
+    i2c_id: bus_a
+    channels:
+      - bus_id: multiplex0channel1
+        channel: 1
+      - bus_id: multiplex0channel2
+        channel: 2
+      - bus_id: multiplex0channel3
+        channel: 3
+      - bus_id: multiplex0channel4
+        channel: 4
+      - bus_id: multiplex0channel5
+        channel: 5
+      - bus_id: multiplex0channel6
+        channel: 6                        
+
+# https://esphome.io/devices/esp32.html
+sensor:
+  - platform: scd30
+    co2:
+      name: "${friendly_name}_sdc30_1_co2"
+      accuracy_decimals: 1
+    temperature:
+      name: "${friendly_name}_sdc30_1_temperature"
+      accuracy_decimals: 2
+    humidity:
+      name: "${friendly_name}_sdc30_1_humidity"
+      accuracy_decimals: 1
+    # temperature_offset: 1.5 °C
+    # address: 0x61
+    i2c_id: multiplex0channel1
+    update_interval: 5s   
+
+  - platform: somose
+    update_interval: ${intervall}
+    i2c_id: multiplex0channel2
+    temperature:
+        name: "${friendly_name}_somose_1_temperature"
+        unit_of_measurement: °C
+    moisture:
+        name: "${friendly_name}_somose_1_moisture"
+        unit_of_measurement: '%'
+  - platform: somose
+    update_interval: ${intervall}
+    i2c_id: multiplex0channel3
+    temperature:
+        name: "${friendly_name}_somose_2_temperature"
+        unit_of_measurement: °C
+    moisture:
+        name: "${friendly_name}_somose_2_moisture"
+        unit_of_measurement: '%'
+  - platform: somose
+    update_interval: ${intervall}
+    i2c_id: multiplex0channel4
+    temperature:
+        name: "${friendly_name}_somose_3_temperature"
+        unit_of_measurement: °C
+    moisture:
+        name: "${friendly_name}_somose_3_moisture"
+        unit_of_measurement: '%'
+  - platform: somose
+    update_interval: ${intervall}
+    i2c_id: multiplex0channel5
+    temperature:
+        name: "${friendly_name}_somose_4_temperature"
+        unit_of_measurement: °C
+    moisture:
+        name: "${friendly_name}_somose_4_moisture"
+        unit_of_measurement: '%'
+  - platform: somose
+    update_interval: ${intervall}    
+    i2c_id: multiplex0channel6
+    temperature:
+        name: "${friendly_name}_somose_5_temperature"
+        unit_of_measurement: °C
+    moisture:
+        name: "${friendly_name}_somose_5_moisture"
+        unit_of_measurement: '%'
