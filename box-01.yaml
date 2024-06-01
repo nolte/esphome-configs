@@ -5,8 +5,11 @@
 
 substitutions:
   name: box-01
-  friendly_name: box_01
+  id: box_01
   intervall: 15s
+  friendly_name: ${name} Sensor
+  friendly_name_temp: ${name} Temperature
+  friendly_name_humidity: ${name} Humidity
 
 esphome:
   name: ${name}
@@ -32,19 +35,19 @@ sensor:
       App.register_component(sht20);
       return {sht20->temperature_sensor, sht20->humidity_sensor, sht20->vpd_sensor, sht20->dew_point_sensor};
     sensors:
-      - name: "Temperature"
-        id: sensor_temperature
+      - name: "${friendly_name_humidity} SHT20"
+        id: ${id}_temperature
         unit_of_measurement: °C
         accuracy_decimals: 2
-      - name: "Humidity"
-        id: sensor_humidity
+      - name: "${friendly_name_humidity} SHT20"
+        id: ${id}_humidity
         unit_of_measurement: "%"
         accuracy_decimals: 2
-      - name: "Vapour-pressure deficit"
-        id: sensor_vpd
+      - name: "${name} Vapour-pressure deficit SHT20"
+        id: ${id}_vpd
         unit_of_measurement: "kPa"
         accuracy_decimals: 2
-      - name: "Dew point"
-        id: sensor_dew_point
+      - name: "${name} Dew point SHT20"
+        id: ${id}_dew_point
         unit_of_measurement: °C
         accuracy_decimals: 2
