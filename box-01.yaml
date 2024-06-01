@@ -4,7 +4,7 @@
 <<: !include ./include-esp8266-i2c.yaml.snipped
 
 substitutions:
-  name: box-01-seedlings
+  name: box-01
   id: box_01
   intervall: 15s
   friendly_name: ${name} Sensor
@@ -35,19 +35,19 @@ sensor:
       App.register_component(sht20);
       return {sht20->temperature_sensor, sht20->humidity_sensor, sht20->vpd_sensor, sht20->dew_point_sensor};
     sensors:
-      - name: "${friendly_name_temp}"
+      - name: "${friendly_name_temp} seedlings"
         id: ${id}_seedlings_temperature
         unit_of_measurement: °C
         accuracy_decimals: 2
-      - name: "${friendly_name_humidity}"
+      - name: "${friendly_name_humidity} seedlings"
         id: ${id}_seedlings_humidity
         unit_of_measurement: "%"
         accuracy_decimals: 2
-      - name: "${name} Vapour-pressure deficit"
+      - name: "${name} Vapour-pressure deficit seedlings"
         id: ${id}_seedlings_vpd
         unit_of_measurement: "kPa"
         accuracy_decimals: 2
-      - name: "${name} Dew point"
+      - name: "${name} Dew point seedlings"
         id: ${id}_seedlings_dew_point
         unit_of_measurement: °C
         accuracy_decimals: 2
