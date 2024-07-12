@@ -27,6 +27,7 @@ api:
 
 # https://esphome.io/components/ota.html
 ota:
+  - platform: esphome
 
 # https://esphome.io/components/web_server.html
 web_server:
