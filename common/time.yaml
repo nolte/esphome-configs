@@ -1,0 +1,3 @@
+time:
+  - platform: homeassistant
+    id: ${id}_homeassistant_time

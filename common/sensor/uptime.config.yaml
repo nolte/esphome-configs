@@ -1,0 +1,4 @@
+platform: uptime
+name: "${name} - Uptime"
+icon: mdi:clock-outline
+update_interval: 60s

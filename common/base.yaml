@@ -1,0 +1,50 @@
+
+defaults:
+  project_name: "NOUS.Smart-Wifi-Socket"
+  project_version: "A1T"
+
+
+esphome:
+  name: $name
+  comment: $comment
+  name_add_mac_suffix: false
+  project:
+    name: $project_name
+    version: $project_version
+
+wifi:
+  domain: !env_var WIFI_DOMAIN
+  ssid: !env_var WIFI_SSID
+  password: !env_var WIFI_PASSWORD
+  # Optional manual IP
+  use_address: ${id}.fritz.box
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Livingroom Fallback Hotspot"
+    password: !env_var WIFI_FALLBACK_PASSWORD
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+# https://esphome.io/components/api.html
+api:
+
+# https://esphome.io/components/mqtt.html
+# mqtt:
+#   broker: !env_var MQTT_ENDPOINT
+#   port: !env_var MQTT_PORT
+#   username: !env_var MQTT_USERNAME
+#   password: !env_var MQTT_PASSWORD
+
+# https://esphome.io/components/ota.html
+ota:
+  - platform: esphome
+
+# https://esphome.io/components/web_server.html
+web_server:
+
+# Activates prometheus /metrics endpoint
+prometheus:
