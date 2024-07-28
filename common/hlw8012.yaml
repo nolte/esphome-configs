@@ -1,0 +1,47 @@
+defaults:
+  cf_pin: GPIO04
+  cf1_pin: GPIO05
+
+sensor:
+  - platform: adc
+    pin: VCC
+    name: "${name} - VCC Volt"
+    icon: mdi:flash-outline
+
+  - platform: total_daily_energy
+    name: "${name} - Electric Consumption [kWh]"
+    power_id: "${id}_watt"
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+    unit_of_measurement: kWh
+    icon: mdi:calendar-clock
+
+  - platform: hlw8012
+    sel_pin:
+      number: GPIO12
+      inverted: True
+    cf_pin: ${cf_pin}
+    cf1_pin: ${cf1_pin}
+    change_mode_every: 4
+    current_resistor: ${current_res}
+    voltage_divider: ${voltage_div}
+    update_interval: 3s
+
+    current:
+      name: "${name} - Ampere"
+      unit_of_measurement: A
+      accuracy_decimals: 3
+      icon: mdi:current-ac
+
+    voltage:
+      name: "${name} - Voltage"
+      unit_of_measurement: V
+      accuracy_decimals: 1
+      icon: mdi:flash-outline
+
+    power:
+      name: "${name} - Power"
+      id: "${id}_watt"
+      unit_of_measurement: W
+      icon: mdi:gauge

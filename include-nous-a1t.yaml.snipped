@@ -4,17 +4,15 @@ esp8266:
   restore_from_flash: true
   early_pin_init: False
 
-time:
-  - platform: homeassistant
-    id: ${id}_homeassistant_time
+packages:
+  base: !include 
+    file: common/base.yaml
+    vars:
+      project_name: "NOUS.Smart-Wifi-Socket"
+      project_version: "A1T"  
+  time: !include common/time.yaml
+  hlw8012: !include common/hlw8012.yaml
 
-esphome:
-  name: $name
-  comment: "Nous Smart Wifi Socket A1T (Tasmota)"
-  name_add_mac_suffix: true
-  project:
-    name: "NOUS.Smart-Wifi-Socket"
-    version: "A1T"
 
 light:
   - platform: status_led
@@ -25,8 +23,7 @@ light:
       inverted: true
 
 binary_sensor:
-  - platform: status
-    name: "${name} - Status"
+  - <<: !include common/binary_sensor/status.config.yaml
 
   # toggle relay on/off
   - platform: gpio
@@ -39,7 +36,7 @@ binary_sensor:
 
 switch:
   - platform: template
-    name: "${id}_${name} - Switch"
+    name: "${name} - Switch"
     icon: mdi:power
     optimistic: true
     restore_mode: RESTORE_DEFAULT_ON
@@ -62,67 +59,9 @@ switch:
     id: ${id}_relay
 
 sensor:
-  - platform: wifi_signal
-    name: "${name} - Wifi Signal"
-    update_interval: 60s
-    icon: mdi:wifi
-
-  - platform: uptime
-    name: "${name} - Uptime"
-    update_interval: 60s
-    icon: mdi:clock-outline
-
-  - platform: total_daily_energy
-    name: "${name} - Electric Consumption [kWh]"
-    power_id: "${id}_nous_a1t_watt"
-    filters:
-      # Multiplication factor from W to kW is 0.001
-      - multiply: 0.001
-    unit_of_measurement: kWh
-    icon: mdi:calendar-clock
-
-  - platform: adc
-    pin: VCC
-    name: "${name} - VCC Volt"
-    icon: mdi:flash-outline
-
-  - platform: hlw8012
-    sel_pin:
-      number: GPIO12
-      inverted: True
-    cf_pin: GPIO04
-    cf1_pin: GPIO05
-    change_mode_every: 4
-    current_resistor: ${current_res}
-    voltage_divider: ${voltage_div}
-    update_interval: 3s
-
-    current:
-      name: "${name} - Ampere"
-      unit_of_measurement: A
-      accuracy_decimals: 3
-      icon: mdi:current-ac
-
-    voltage:
-      name: "${name} - Voltage"
-      unit_of_measurement: V
-      accuracy_decimals: 1
-      icon: mdi:flash-outline
-
-    power:
-      name: "${name} - Power"
-      id: "${id}_nous_a1t_watt"
-      unit_of_measurement: W
-      icon: mdi:gauge
+  - <<: !include common/sensor/uptime.config.yaml
+  - <<: !include common/sensor/wifi_signal.config.yaml
 
 text_sensor:
-  - platform: wifi_info
-    ip_address:
-      name: "${name} - IP Address"
-    ssid:
-      name: "${name} - Wi-Fi SSID"
-    bssid:
-      name: "${name} - Wi-Fi BSSID"
-  - platform: version
-    name: "${name} - ESPHome Version"
-    hide_timestamp: true
+  - <<: !include common/text_sensor/wifi_info.config.yaml
+  - <<: !include common/text_sensor/version.config.yaml

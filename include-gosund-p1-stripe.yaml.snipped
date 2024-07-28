@@ -29,13 +29,10 @@ uart:
 
 
 sensor:
-  - platform: wifi_signal
-    name: "${name} - WiFi Signal"
-    update_interval: 60s
-  - platform: uptime
-    name: "${name} - Uptime"
-    icon: mdi:clock-outline
-    update_interval: 60s
+
+  - <<: !include common/sensor/uptime.config.yaml
+  - <<: !include common/sensor/wifi_signal.config.yaml
+
   - platform: cse7766
     current:
       name: "${name} - Ampere"

@@ -5,6 +5,7 @@
 substitutions:
   name: gosund-sp111-05
   id: gosund_sp111_05
+  comment: "playground plug"
   # Higher value gives lower watt readout
   current_res: "0.00280"
   # Lower value gives lower voltage readout

@@ -3,6 +3,7 @@
 <<: !include ./include-nous-a1t.yaml.snipped
 
 substitutions:
+  comment: ""
   name: nous-a1t-01
   id: nous_a1t_01
   # Higher value gives lower watt readout
