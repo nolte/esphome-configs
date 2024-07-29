@@ -1,13 +1,9 @@
-# include the base config like wifi and logging
-<<: !include ./include-base.yaml.snipped
-<<: !include ./include-nous-a1t.yaml.snipped
-
 substitutions:
   comment: ""
   name: nous-a1t-01
   id: nous_a1t_01
-  # Higher value gives lower watt readout
-  current_res: "0.00280"
-  # Lower value gives lower voltage readout
-  voltage_div: "775"
 
+
+packages:
+  plug: !include 
+    file: common/nous-a1t.yaml
