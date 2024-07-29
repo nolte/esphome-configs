@@ -2,11 +2,10 @@
 defaults:
   project_name: "NOUS.Smart-Wifi-Socket"
   project_version: "A1T"
-
-
+  
 esphome:
   name: $name
-  comment: $comment
+  comment: ${comment}
   name_add_mac_suffix: false
   project:
     name: $project_name

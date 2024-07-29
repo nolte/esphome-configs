@@ -1,0 +1,75 @@
+
+defaults:
+  # Higher value gives lower watt readout
+  current_res: "0.00280"
+  # Lower value gives lower voltage readout
+  voltage_div: "775"
+  restore_mode: RESTORE_DEFAULT_OFF
+
+
+esp8266:
+  board: esp8285
+  restore_from_flash: true
+  early_pin_init: False
+
+packages:
+  base: !include 
+    file: ./base.yaml
+    vars:
+      project_name: "NOUS.Smart-Wifi-Socket"
+      project_version: "A1T"  
+  time: !include ./time.yaml
+  hlw8012: !include ./hlw8012.yaml
+
+
+light:
+  - platform: status_led
+    id: ${id}_led
+    restore_mode: ${restore_mode}
+    pin:
+      number: GPIO13
+      inverted: true
+
+binary_sensor:
+  - <<: !include ./binary_sensor/status.config.yaml
+
+  # toggle relay on/off
+  - platform: gpio
+    pin:
+      number: GPIO00
+      mode: INPUT_PULLUP
+    id: "${id}_button_state"
+    on_press:
+      - switch.toggle: "${id}_button_switch"
+
+switch:
+  - platform: template
+    name: "${name} - Switch"
+    icon: mdi:power
+    optimistic: true
+    restore_mode: ${restore_mode}
+    id: "${id}_button_switch"
+    lambda: |-
+      if (id(${id}_relay).state) {
+        return true;
+      } else {
+        return false;
+      }
+    turn_on_action:
+      - switch.turn_on: ${id}_relay
+      - light.turn_on: ${id}_led
+    turn_off_action:
+      - switch.turn_off: ${id}_relay
+      - light.turn_off: ${id}_led
+  - platform: gpio
+    restore_mode: ${restore_mode}
+    pin: GPIO14
+    id: ${id}_relay
+
+sensor:
+  - <<: !include ./sensor/uptime.config.yaml
+  - <<: !include ./sensor/wifi_signal.config.yaml
+
+text_sensor:
+  - <<: !include ./text_sensor/wifi_info.config.yaml
+  - <<: !include ./text_sensor/version.config.yaml
