@@ -1,0 +1,80 @@
+
+defaults:
+  current_res: "0.00280"
+  # Lower value gives lower voltage readout
+  voltage_div: "775"
+  restore_mode: RESTORE_DEFAULT_OFF
+
+
+esphome:
+  platform: ESP8266
+  board: esp8285
+
+# Enable logging
+logger:
+  baud_rate: 0
+
+packages:
+  base: !include 
+    file: ./base.yaml
+    vars:
+      project_name: "GOSUND.Smart-Wifi-Socket"
+      project_version: "SP-111" 
+  time: !include ./time.yaml
+  hlw8012: !include
+    file: ./hlw8012.yaml
+    vars:
+      cf_pin: GPIO05
+      cf1_pin: GPIO04
+
+text_sensor:
+  - <<: !include ./text_sensor/wifi_info.config.yaml
+  - <<: !include ./text_sensor/version.config.yaml
+
+binary_sensor:
+  - <<: !include ./binary_sensor/status.config.yaml
+
+  # toggle relay on/off
+  - platform: gpio
+    pin:
+      number: GPIO13
+      mode: INPUT_PULLUP
+      inverted: True
+    id: ${id}_button_state
+    on_press:
+      - switch.toggle: "${id}_button_switch"
+
+sensor:
+  - <<: !include ./sensor/uptime.config.yaml
+  - <<: !include ./sensor/wifi_signal.config.yaml
+
+status_led:
+  pin:
+    number: GPIO02
+    inverted: True
+  id: led_blue
+
+output:
+  - platform: gpio
+    pin: GPIO00
+    inverted: true
+    id: led_red
+
+switch:
+  - platform: template
+    name: "${name} - Switch"
+    icon: mdi:power
+    optimistic: true
+    restore_mode: ${restore_mode}
+    id: ${id}_button_switch
+    turn_on_action:
+      - switch.turn_on: relay
+      - output.turn_on: led_red
+    turn_off_action:
+      - switch.turn_off: relay
+      - output.turn_off: led_red
+  
+  - platform: gpio
+    restore_mode: ${restore_mode}
+    pin: GPIO15
+    id: relay
