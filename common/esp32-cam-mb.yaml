@@ -1,11 +1,17 @@
 
-esphome:
-    name: ${name}
+
+packages:
+  base: !include 
+    file: ./base.yaml
+    vars:
+      project_name: "ESP.Smart-Wifi-CAM"
+      project_version: "espcam32" 
 
 # Enable logging
 logger:
-    level: VERBOSE
+    #level: VERBOSE
     tx_buffer_size: 256
+    baud_rate: 115200
 
 esp32:
     #board: esp32cam
@@ -69,26 +75,8 @@ light:
       output: ${id}_gpio_33
       name: ${name} led
       id: ${id}_led
+
 switch:
     - platform: restart
       name: ${name} restart
       id: ${id}_restart
-# binary_sensor:
-#   - platform: status
-#     name: ${name} status
-#     id: ${id}_status
-# sensor:
-#   - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
-#     name: "${name} WiFi Signal dB"
-#     id: "${id}_wifi_signal_db"
-#     update_interval: 60s
-#     entity_category: "diagnostic"
-
-# - platform: copy # Reports the WiFi signal strength in %
-# source_id: "${id}_wifi_signal_db"
-# name: "${name} WiFi Signal Percent"
-# filters:
-#   - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
-# unit_of_measurement: "Signal %"
-# entity_category: "diagnostic"
-# id: "${id}_signal_percent"

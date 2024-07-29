@@ -1,7 +1,8 @@
-# include the base config like wifi and logging
-<<: !include ./include-base.yaml.snipped
-<<: !include ./include-esp32-cam-mb.yaml.snipped
-
 substitutions:
   name: cam-02
   id: cam_02
+  comment: "Box2 CAM 02"
+
+packages:
+  cam: !include 
+    file: common/esp32-cam-mb.yaml

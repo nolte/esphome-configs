@@ -31,8 +31,6 @@ light:
       inverted: true
 
 binary_sensor:
-  - <<: !include ./binary_sensor/status.config.yaml
-
   # toggle relay on/off
   - platform: gpio
     pin:
@@ -66,10 +64,3 @@ switch:
     pin: GPIO14
     id: ${id}_relay
 
-sensor:
-  - <<: !include ./sensor/uptime.config.yaml
-  - <<: !include ./sensor/wifi_signal.config.yaml
-
-text_sensor:
-  - <<: !include ./text_sensor/wifi_info.config.yaml
-  - <<: !include ./text_sensor/version.config.yaml
