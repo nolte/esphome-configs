@@ -2,11 +2,12 @@ substitutions:
   name: nous-a1t-04
   id: nous_a1t_04
   comment: "Box02 Pump"
-  restore_mode: ALWAYS_OFF
 
 packages:
   plug: !include 
     file: common/nous-a1t.yaml
+    vars:
+      restore_mode: ALWAYS_OFF
   intervall: !include 
     file: common/switch-intervall.yaml
 

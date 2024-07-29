@@ -4,10 +4,11 @@ substitutions:
   name: nous-a1t-06
   id: nous_a1t_06
   comment: "POC mother tents"
-  restore_mode: ALWAYS_OFF
 
 packages:
   nous: !include 
     file: common/nous-a1t.yaml
+    vars:
+      restore_mode: ALWAYS_OFF
   intervall: !include 
     file: common/switch-intervall.yaml

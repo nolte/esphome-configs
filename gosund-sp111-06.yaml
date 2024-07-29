@@ -5,8 +5,11 @@ substitutions:
   name: gosund-sp111-06
   id: gosund_sp111_06
   comment: "Box2 Air"
-  restore_mode: ALWAYS_On
+
 
 packages:
   plug: !include 
     file: common/gosund-sp111.yaml
+    vars:
+      restore_mode: ALWAYS_ON
+

@@ -3,11 +3,11 @@ substitutions:
   comment: "Box Mother Pump"
   name: nous-a1t-02
   id: nous_a1t_02
-  restore_mode: ALWAYS_OFF
-
 
 packages:
   plug: !include 
     file: common/nous-a1t.yaml
+    vars:
+      restore_mode: ALWAYS_OFF
   intervall: !include 
     file: common/switch-intervall.yaml
