@@ -47,3 +47,14 @@ web_server:
 
 # Activates prometheus /metrics endpoint
 prometheus:
+
+binary_sensor:
+  - <<: !include ./binary_sensor/status.config.yaml
+
+sensor:
+  - <<: !include ./sensor/uptime.config.yaml
+  - <<: !include ./sensor/wifi_signal.config.yaml
+
+text_sensor:
+  - <<: !include ./text_sensor/wifi_info.config.yaml
+  - <<: !include ./text_sensor/version.config.yaml

@@ -1,7 +1,8 @@
-# include the base config like wifi and logging
-<<: !include ./include-base.yaml.snipped
-<<: !include ./include-esp32-cam-mb.yaml.snipped
 
 substitutions:
   name: cam-03
   id: cam_03
+
+packages:
+  cam: !include 
+    file: common/esp32-cam-mb.yaml

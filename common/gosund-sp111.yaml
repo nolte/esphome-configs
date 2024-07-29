@@ -27,13 +27,7 @@ packages:
       cf_pin: GPIO05
       cf1_pin: GPIO04
 
-text_sensor:
-  - <<: !include ./text_sensor/wifi_info.config.yaml
-  - <<: !include ./text_sensor/version.config.yaml
-
 binary_sensor:
-  - <<: !include ./binary_sensor/status.config.yaml
-
   # toggle relay on/off
   - platform: gpio
     pin:
@@ -43,10 +37,6 @@ binary_sensor:
     id: ${id}_button_state
     on_press:
       - switch.toggle: "${id}_button_switch"
-
-sensor:
-  - <<: !include ./sensor/uptime.config.yaml
-  - <<: !include ./sensor/wifi_signal.config.yaml
 
 status_led:
   pin:
