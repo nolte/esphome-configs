@@ -1,13 +1,13 @@
-# include the base config like wifi and logging
-<<: !include ./include-base.yaml.snipped
-<<: !include ./include-nous-a1t.yaml.snipped
 
 substitutions:
-  comment: ""
+  comment: "Box Mother Pump"
   name: nous-a1t-02
   id: nous_a1t_02
-  # Higher value gives lower watt readout
-  current_res: "0.00280"
-  # Lower value gives lower voltage readout
-  voltage_div: "775"
+  restore_mode: ALWAYS_OFF
 
+
+packages:
+  plug: !include 
+    file: common/nous-a1t.yaml
+  intervall: !include 
+    file: common/switch-intervall.yaml
