@@ -1,7 +1,8 @@
 substitutions:
   name: nous-a1t-04
   id: nous_a1t_04
-  comment: "Box02 Pump"
+  comment: "Box Mother Pump"
+  
 
 packages:
   plug: !include 
