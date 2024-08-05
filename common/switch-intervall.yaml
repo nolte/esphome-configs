@@ -1,14 +1,65 @@
 
+defaults:
+  restore_mode: RESTORE_DEFAULT_OFF
+  intervall_duration: "10"
+  intervall_repeat: "1"
+
+
+binary_sensor:
+  - platform: template
+    name: "Intervall Plump"
+    id: ${id}_intervall_plump_status
+    lambda: |-
+      return id(${id}_intervall).is_running();
+
+
+switch:
+  - platform: template
+    name: "${name} - Intervall Pump"
+    icon: mdi:power
+    optimistic: true
+    restore_mode: ${restore_mode}
+    id: ${id}_intervall_pump
+    lambda: |-
+      if (id(${id}_intervall).is_running()) {
+        return true;
+      } else {
+        return false;
+      }
+    turn_on_action:
+      - script.execute: ${id}_intervall
+      - script.wait: ${id}_intervall
+    turn_off_action:
+      - script.execute: ${id}_intervall_stop
+      - script.wait: ${id}_intervall_stop
+
 script:
-  - id: ${id}_intervall
-    then:
-      - switch.turn_on: ${id}_button_switch
-      - logger.log:
-          format: "Waiting %.1fs"
-          args: [ 'id(${id}_intervall_duration).state' ]      
-      - delay: !lambda "return id(${id}_intervall_duration).state * 1000;"
+
+- id: ${id}_intervall_stop
+  then:
+      - script.stop: ${id}_intervall
       - switch.turn_off: ${id}_button_switch
+
+- id: ${id}_intervall
+  then:
+      - repeat:
+          count: !lambda "return id(${id}_intervall_repeat).state;"
+          then:
+            - switch.turn_on: ${id}_button_switch
+            - logger.log:
+                format: "Waiting %.1fs"
+                args: [ 'id(${id}_intervall_duration).state' ]      
+            - delay: !lambda "return id(${id}_intervall_duration).state * 1000;"
+            - switch.turn_off: ${id}_button_switch
+            - delay: !lambda |- 
+                if(iteration < id(${id}_intervall_repeat).state -1 )
+                {
+                  return id(${id}_intervall_duration).state * 1000 *2;
+                } else {
+                  return 0;
+                }
  
+
 number:
   - platform: template
     name: "${name} - Intervall Duration"
@@ -16,10 +67,36 @@ number:
     optimistic: true
     min_value: 0
     max_value: 30
+    initial_value: ${intervall_duration}
+    restore_value: true
     step: 5
+    icon: mdi:clock-time-eight-outline
+
+  - platform: template
+    name: "${name} - Repeat Count"
+    id: ${id}_intervall_repeat
+    icon: mdi:repeat
+    optimistic: true
+    restore_value: true
+    min_value: 0
+    max_value: 5
+    initial_value: ${intervall_repeat}
+    step: 1
 
 button:
+
   - platform: template
     name: "${name} - Intervall"
+    id: ${id}_intervall_btn
+    icon: mdi:water-pump
     on_press:
       - script.execute: ${id}_intervall
+      - script.wait: ${id}_intervall
+
+  - platform: template
+    name: "${name} - Stop"
+    id: ${id}_stop
+    icon: mdi:water-pump
+    on_press:
+      - script.execute: ${id}_intervall_stop
+      - script.wait: ${id}_intervall_stop

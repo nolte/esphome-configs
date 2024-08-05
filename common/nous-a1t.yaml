@@ -1,3 +1,5 @@
+# https://devices.esphome.io/devices/Nous-A1t
+
 
 defaults:
   # Higher value gives lower watt readout

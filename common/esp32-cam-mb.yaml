@@ -54,6 +54,12 @@ esp32_camera:
     # white balance setting
     wb_mode: auto
 
+esp32_camera_web_server:
+  - port: 8080
+    mode: stream
+  - port: 8081
+    mode: snapshot
+
 output:
     # white LED
     - platform: ledc
