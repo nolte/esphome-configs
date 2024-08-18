@@ -3,7 +3,9 @@
 substitutions:
   name: nous-a1t-06
   id: nous_a1t_06
-  comment: "POC mother tents"
+  comment: "Lamp Box 01"
+  time_start: 07:00:00
+  time_end: 01:00:00
 
 packages:
   nous: !include 
@@ -11,120 +13,8 @@ packages:
     vars:
       restore_mode: ALWAYS_OFF
 
-
-datetime:
-
-  - platform: template
-    id: ${id}_time_start
-    type: time
-    name: ${name} - Start
-    optimistic: yes
-    initial_value: "08:00:00"
-    restore_value: true
-    on_time:
-      - switch.turn_on:
-          id: ${id}_button_switch
-
-
-  - platform: template
-    id: ${id}_time_end
-    type: time
-    name: ${name} - End
-    optimistic: yes
-    initial_value: "20:00:00"
-    restore_value: true
-    on_time:
-      - switch.turn_off:
-          id: ${id}_button_switch
-
-sensor:
-
-  - platform: template
-    name: "${name} end hour"
-    id: ${id}_time_end_hour
-    lambda: |-
-    
-      auto dateEnd = id(${id}_time_end).state_as_esptime();
-      dateEnd.recalc_timestamp_local(true);
-      return dateEnd.timestamp;
-
-  # - platform: template
-  #   name: "${name} start hour"
-  #   id: ${id}_time_start_hour
-  #   lambda: |-
-  #     return id(${id}_time_start).timestamp;
-
-
-  - platform: template
-    name: "${name} Now hour"
-    id: ${id}_time_now_hour
-    lambda: |-
-      if (id(${id}_sntp_time).now().is_valid()){
-        return id(${id}_sntp_time).now().hour;
-      }else {
-        return false;
-      }
-
-time:
-  - platform: sntp
-    id: ${id}_sntp_time
-    timezone: Europe/Berlin
-    servers:
-     - 0.pool.ntp.org
-     - 1.pool.ntp.org
-     - 2.pool.ntp.org
-
-
-# binary_sensor:
-#   - platform: template
-#     name: "${name} Lamp"
-#     id: ${id}_lamp_status
-#     on_press:
-#       then:
-#         - switch.turn_on: ${id}_button_switch 
-#     on_release:
-#       then:
-#         - switch.turn_off: ${id}_button_switch            
-#     lambda: |-
-#       if (id(${id}_sntp_time).now().is_valid()){
-#         auto timeNow = id(${id}_sntp_time).now();
-#         auto timeStart = id(${id}_time_start);
-#         auto timeEnd = id(${id}_time_end);
-
-#         if(
-#           (timeNow.hour < id(${id}_time_start).hour) 
-#           || (timeNow.hour > id(${id}_time_end).hour)
-#         ){
-#           return false;
-#         }else if(
-#           timeNow.hour == id(${id}_time_start).hour &&
-#           timeNow.minute < id(${id}_time_start).minute
-#         ){
-#           return false;
-#         }else if(
-#           timeNow.hour == id(${id}_time_end).hour &&
-#           timeNow.minute >= id(${id}_time_end).minute
-#         ){
-#           return false;
-#         }
-#         return true;
-#       } else {
-#         return false;
-#       }
-
-# script:
-#   - id: ${id}_intervall
-#     then:
-#       - switch.turn_on: ${id}_button_switch
-#       - logger.log:
-#           format: "Waiting %.1fs"
-#           args: [ 'id(${id}_intervall_duration).state' ]      
-#       - delay: !lambda "return id(${id}_intervall_duration).state * 1000;"
-#       - switch.turn_off: ${id}_button_switch
- 
-
-#  button:
-#   - platform: template
-#     name: "${name} - Intervall"
-#     on_press:
-#       - script.execute: ${id}_intervall
+  duration: !include 
+    file: common/active-duration.yaml
+    vars:
+      time_start: ${time_start}
+      time_end: ${time_end}

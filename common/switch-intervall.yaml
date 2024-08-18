@@ -15,6 +15,16 @@ binary_sensor:
 
 switch:
   - platform: template
+    name: "${name} - automation active"
+    icon: mdi:power
+    optimistic: true
+    restore_mode: ${restore_mode}
+    id: ${id}_automation_active
+    turn_off_action:
+      - script.execute: ${id}_intervall_stop
+      - script.wait: ${id}_intervall_stop
+
+  - platform: template
     name: "${name} - Intervall Pump"
     icon: mdi:power
     optimistic: true
@@ -45,19 +55,23 @@ script:
       - repeat:
           count: !lambda "return id(${id}_intervall_repeat).state;"
           then:
-            - switch.turn_on: ${id}_button_switch
-            - logger.log:
-                format: "Waiting %.1fs"
-                args: [ 'id(${id}_intervall_duration).state' ]      
-            - delay: !lambda "return id(${id}_intervall_duration).state * 1000;"
-            - switch.turn_off: ${id}_button_switch
-            - delay: !lambda |- 
-                if(iteration < id(${id}_intervall_repeat).state -1 )
-                {
-                  return id(${id}_intervall_duration).state * 1000 *2;
-                } else {
-                  return 0;
-                }
+          - if:
+              condition:
+                lambda: 'return id(${id}_automation_active).state;'
+              then:
+              - switch.turn_on: ${id}_button_switch
+              - logger.log:
+                  format: "Waiting %.1fs"
+                  args: [ 'id(${id}_intervall_duration).state' ]      
+              - delay: !lambda "return id(${id}_intervall_duration).state * 1000;"
+              - switch.turn_off: ${id}_button_switch
+              - delay: !lambda |- 
+                  if(iteration < id(${id}_intervall_repeat).state -1 )
+                  {
+                    return id(${id}_intervall_duration).state * 1000 *2;
+                  } else {
+                    return 0;
+                  }
  
 
 number:

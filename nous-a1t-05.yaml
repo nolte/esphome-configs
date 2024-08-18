@@ -1,7 +1,11 @@
 substitutions:
   name: nous-a1t-05
   id: nous_a1t_05
+  comment: "Heting Box 01"
+
 
 packages:
   plug: !include 
     file: common/nous-a1t.yaml
+    vars:
+      restore_mode: RESTORE_DEFAULT_ON

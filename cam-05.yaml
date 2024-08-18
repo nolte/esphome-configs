@@ -1,0 +1,8 @@
+substitutions:
+  name: cam-05
+  id: cam_05
+  comment: "Box 01 CAM 01"
+
+packages:
+  cam: !include 
+    file: common/esp32-cam-mb.yaml

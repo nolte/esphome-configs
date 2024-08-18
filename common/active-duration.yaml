@@ -1,0 +1,68 @@
+# for planting lights
+defaults: 
+  time_start: 07:00:00
+  time_end: 01:00:00
+  timezone: Europe/Berlin
+  restore_mode_automation: RESTORE_DEFAULT_ON
+
+
+script:
+
+- id: ${id}_intervall_start
+  then:
+    - if:
+        condition:
+          lambda: 'return id(${id}_automation_active).state;'
+        then:
+          - switch.turn_on:
+              id: ${id}_button_switch
+
+- id: ${id}_intervall_stop
+  then:
+    - if:
+        condition:
+          lambda: 'return id(${id}_automation_active).state;'
+        then:
+          - switch.turn_off:
+              id: ${id}_button_switch
+
+switch:
+  - platform: template
+    name: "${name} - automation active"
+    icon: mdi:power
+    optimistic: true
+    restore_mode: ${restore_mode_automation}
+    id: ${id}_automation_active
+
+datetime:
+  - platform: template
+    id: ${id}_time_start
+    type: time
+    name: ${name} - Start
+    optimistic: yes
+    initial_value: "${time_start}"
+    restore_value: true
+    on_time:
+      - script.execute: ${id}_intervall_start
+      - script.wait: ${id}_intervall_start
+
+
+  - platform: template
+    id: ${id}_time_end
+    type: time
+    name: ${name} - End
+    optimistic: yes
+    initial_value: "${time_end}"
+    restore_value: true
+    on_time:
+      - script.execute: ${id}_intervall_stop
+      - script.wait: ${id}_intervall_stop
+
+time:
+  - platform: sntp
+    id: ${id}_sntp_time
+    timezone: ${timezone}
+    servers:
+     - 0.pool.ntp.org
+     - 1.pool.ntp.org
+     - 2.pool.ntp.org
