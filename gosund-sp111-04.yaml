@@ -3,7 +3,17 @@ substitutions:
   name: gosund-sp111-04
   id: gosund_sp111_04
   comment: "Box 4 Lamp"
+  time_start: 07:00:00
+  time_end: 01:00:00
 
 packages:
   plug: !include 
     file: common/gosund-sp111.yaml
+    vars:
+      restore_mode: RESTORE_DEFAULT_OFF
+
+  duration: !include 
+    file: common/active-duration.yaml
+    vars:
+      time_start: ${time_start}
+      time_end: ${time_end}
