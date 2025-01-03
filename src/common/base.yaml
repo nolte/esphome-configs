@@ -16,7 +16,7 @@ wifi:
   ssid: !env_var WIFI_SSID
   password: !env_var WIFI_PASSWORD
   # Optional manual IP
-  use_address: ${id}.fritz.box
+  use_address: ${name}.fritz.box
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "Livingroom Fallback Hotspot"
