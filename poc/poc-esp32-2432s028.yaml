@@ -69,22 +69,22 @@ time:
   - platform: homeassistant
     id: esptime
 
-font:
-  - file: "../fonts/Helvetica.ttf"
-    id: helvetica_48
-    size: 48
-  - file: "../fonts/Helvetica.ttf"
-    id: helvetica_36
-    size: 36
-  - file: "../fonts/Helvetica.ttf"
-    id: helvetica_24
-    size: 24
-  - file: "../fonts/Helvetica.ttf"
-    id: helvetica_18
-    size: 18
-  - file: "../fonts/Helvetica.ttf"
-    id: helvetica_12
-    size: 12
+# font:
+#   - file: "../fonts/Helvetica.ttf"
+#     id: helvetica_48
+#     size: 48
+#   - file: "../fonts/Helvetica.ttf"
+#     id: helvetica_36
+#     size: 36
+#   - file: "../fonts/Helvetica.ttf"
+#     id: helvetica_24
+#     size: 24
+#   - file: "../fonts/Helvetica.ttf"
+#     id: helvetica_18
+#     size: 18
+#   - file: "../fonts/Helvetica.ttf"
+#     id: helvetica_12
+#     size: 12
 
 
 sensor:

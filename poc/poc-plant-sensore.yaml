@@ -1,0 +1,75 @@
+# include the base config like wifi and logging
+<<: !include ../include-base.yaml.snipped
+<<: !include ../include-esp32.yaml.snipped
+<<: !include ../include-esp32-i2c.yaml.snipped
+<<: !include ./poc.yaml
+
+esphome:
+  name: ${name}
+
+
+tca9548a:
+  - address: 0x70
+    id: multiplex0
+    i2c_id: bus_a
+    channels:
+      - bus_id: multiplex0channel0
+        channel: 2
+    #   - bus_id: multiplex0channel1
+    #     channel: 3
+    #   - bus_id: multiplex0channel6
+    #     channel: 6
+      - bus_id: multiplex0channel7
+        channel: 7                
+
+substitutions:
+  name: poc-plant-sensore
+  id: poc_plant_sensore_01
+  friendly_name: plant-01
+
+# https://esphome.io/devices/esp32.html
+sensor:
+  - platform: somose
+    address: 0x55
+    update_interval: 15s
+    i2c_id: multiplex0channel0
+    temperature:
+        name: "somose1_temperature"
+        unit_of_measurement: °C
+    moisture:
+        name: "somose1_moisture"
+        unit_of_measurement: '%'
+
+#   - platform: somose
+#     address: 0x55
+#     update_interval: 15s
+#     i2c_id: multiplex0channel1
+#     temperature:
+#         name: "somose2_temperature"
+#         unit_of_measurement: °C
+#     moisture:
+#         name: "somose2_moisture"
+#         unit_of_measurement: '%'
+
+#   - platform: somose
+#     address: 0x55
+#     update_interval: 15s
+#     i2c_id: multiplex0channel6
+#     temperature:
+#         name: "somose3_temperature"
+#         unit_of_measurement: °C
+#     moisture:
+#         name: "somose3_moisture"
+#         unit_of_measurement: '%'
+
+
+  - platform: somose
+    address: 0x55
+    update_interval: 15s
+    i2c_id: multiplex0channel7
+    temperature:
+        name: "somose4_temperature"
+        unit_of_measurement: °C
+    moisture:
+        name: "somose4_moisture"
+        unit_of_measurement: '%'

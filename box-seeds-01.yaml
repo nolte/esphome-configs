@@ -1,0 +1,24 @@
+# include the base config like wifi and logging
+<<: !include ./include-base.yaml.snipped
+#<<: !include ./include-esp32.yaml.snipped
+<<: !include ./include-esp32-i2c.yaml.snipped
+
+esp32:
+  board: az-delivery-devkit-v4
+
+esphome:
+  name: ${name}
+  
+substitutions:
+  name: box-seed-01
+  id: fement_01
+  comment: "Setzling Box"
+
+sensor:
+  - platform: sht3xd
+    temperature:
+      name: "${name} Temperature"
+    humidity:
+      name: "${name} Humidity"
+    address: 0x44
+    update_interval: 30s

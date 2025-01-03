@@ -1,0 +1,143 @@
+substitutions:
+  room: Bureau
+  sufix: bureau
+  timezone: "Europe/Paris"
+  log_level: ERROR
+  leds_off: 'false'
+  high_speed: 'false'
+
+globals:
+  - id: leds_off
+    type: bool
+    initial_value: ${leds_off}
+  - id: high_speed
+    type: bool
+    initial_value: ${high_speed}
+
+esphome:
+  name: diffuseur-${sufix}
+
+esp8266:
+  board: esp01_1m
+  restore_from_flash: true
+
+
+
+uart:
+  baud_rate: 9600
+  tx_pin: GPIO1
+  rx_pin: GPIO3
+
+logger:
+  baud_rate: 0
+  level: ${log_level}
+
+tuya:
+  time_id: my_timer
+  on_datapoint_update:
+    - sensor_datapoint: 13
+      datapoint_type: enum
+      then:
+        - lambda: if (x>0x0) tuya_tuya->set_enum_datapoint_value(13, 0x0);
+    - sensor_datapoint: 103
+      datapoint_type: enum
+      then:
+        - lambda: if (x==0x2) {auto call = id(diffuseur_${sufix}).turn_off();call.perform();}
+
+binary_sensor:
+  - platform: "tuya"
+    name: Eau Diffuseur ${room}
+    id: eau_diffuseur_${sufix}
+    sensor_datapoint: 12
+    device_class: "problem"
+    on_press:
+      then:
+        - script.stop: planed_diffusion
+        - script.stop: morning_diffusion
+        - homeassistant.service:
+            service: persistent_notification.create
+            data:
+              title: "Capteur d'eau du diffuseur du ${sufix}"
+              message: "Il n'y a plus d'eau dans le diffuseur du ${sufix}"
+              notification_id: "eau_diffuseur_${sufix}"
+    on_release:
+      then:
+        - homeassistant.service:
+            service: persistent_notification.dismiss
+            data:
+              notification_id: "eau_diffuseur_${sufix}"
+
+fan:
+  - platform: tuya
+    name: "Diffuseur ${room}"
+    id: diffuseur_${sufix}
+    switch_datapoint: 1
+    speed_datapoint: 103
+    speed_count: 3
+    on_turn_on:
+      then:
+        - if:
+            condition:
+              - lambda: return (id(leds_off) || id(high_speed));
+            then:
+              - delay: 1s
+        - if:
+            condition:
+              - lambda: return id(leds_off);
+            then:
+              - light.turn_off: leds_diffuseur_${sufix}
+        - if:
+            condition:
+              - lambda: return id(high_speed);
+            then:
+              - fan.cycle_speed: diffuseur_${sufix}
+    # on_turn_off:
+    #   then:
+    #     - script.stop: planed_diffusion
+    #     - script.stop: morning_diffusion
+
+light:
+  - platform: tuya
+    name: Leds Diffuseur ${room}
+    id: leds_diffuseur_${sufix}
+    dimmer_datapoint: 111
+    switch_datapoint: 11
+    min_value: 1
+
+# # Defining planned diffusion
+# time:
+#   - platform: homeassistant
+#     id: my_timer
+#     timezone: ${timezone}
+#     on_time:
+#       minutes: 15
+#       hours: 6
+#       seconds: 0
+#       then:
+#         - if:
+#             condition:
+#               - fan.is_off: diffuseur_${sufix}
+#             then:
+#               - script.execute: planed_diffusion
+
+# script:
+#   - id: planed_diffusion
+#     then:
+#       - fan.turn_on: diffuseur_${sufix}
+#       - delay: 00:00:01
+#       - light.turn_off: leds_diffuseur_${sufix}
+#       - delay:
+#           hours: 1
+#       - fan.turn_off: diffuseur_${sufix}
+#   - id: morning_diffusion
+#     then:
+#       - if:
+#           condition:
+#             - fan.is_off: diffuseur_${sufix}
+#           then:
+#             - fan.turn_on: diffuseur_${sufix}
+#             - delay: 00:00:01
+#             - light.turn_off: leds_diffuseur_${sufix}
+#             - delay:
+#                 minutes: 30
+#             - fan.turn_off: diffuseur_${sufix}

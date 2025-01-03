@@ -1,0 +1,34 @@
+# include the base config like wifi and logging
+<<: !include ../include-base.yaml.snipped
+<<: !include ../include-esp32.yaml.snipped
+<<: !include ./poc.yaml
+
+esphome:
+  name: ${name}
+
+
+sensor:
+  - platform: adc
+    pin: A0
+    name: "Regen Wert"
+    id: RegenWert
+    internal: true
+    update_interval: 10s
+    accuracy_decimals: 1    
+    unit_of_measurement: 'V'
+  
+  - platform: template
+    name: "Regen Sensor Volt"
+    unit_of_measurement: "V"
+    lambda: return id(RegenWert).state;
+    update_interval: 10s
+
+binary_sensor:
+  - platform: gpio
+    name: "Regensensor"
+    pin: GPIO23
+  # - platform: gpio
+  #   pin:
+  #     number: D1
+  #     inverted: true
+  #   name: "Regensensor"

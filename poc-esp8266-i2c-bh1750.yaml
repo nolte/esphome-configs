@@ -1,0 +1,14 @@
+# include the base config like wifi and logging
+<<: !include ../include-base.yaml.snipped
+<<: !include ../include-esp8266.yaml.snipped
+<<: !include ../include-esp8266-i2c.yaml.snipped
+
+esphome:
+  name: ${name}
+
+# https://esphome.io/devices/esp32.html
+sensor:
+  - platform: bh1750
+    name: "BH1750 Illuminance"
+    address: 0x23
+    update_interval: 60s

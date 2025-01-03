@@ -1,0 +1,106 @@
+# include the base config like wifi and logging
+#<<: !include ./include-base.yaml.snipped
+#<<: !include ./include-esp32.yaml.snipped
+#<<: !include ./include-esp32-i2c.yaml.snipped
+
+substitutions:
+  name: box-fementation-01
+  id: fement_01
+  comment: "Fementierungs Box"
+
+
+
+
+# esp32:
+#   board: az-delivery-devkit-v4
+
+packages:
+  board: !include 
+    file: ./common/esp32-az-delivery.yaml
+    #vars:
+    #  project_name: "Fementierungs Box"
+    #  project_version: "ESP-111" 
+
+  base: !include 
+    file: ./common/base.yaml
+    vars:
+      project_name: "Fementierungs Box"
+      project_version: "ESP-111" 
+
+  time: !include ./common/time.yaml
+
+# tca9548a:
+#   - address: 0x70
+#     id: multiplex0
+#     i2c_id: bus_a
+#     channels:
+#       # - bus_id: multiplex0channel2
+#       #   channel: 2
+#       # - bus_id: multiplex0channel3
+#       #   channel: 3
+#       # - bus_id: multiplex0channel4
+#       #   channel: 4
+#       - bus_id: multiplex0channel5
+#         channel: 5
+#       - bus_id: multiplex0channel6
+#         channel: 6
+#       - bus_id: multiplex0channel7
+#         channel: 7  
+
+sensor: 
+  - platform: scd30
+    # i2c_id: multiplex0channel7
+    id: ${id}
+    co2:
+      name: "${name} CO2"
+      accuracy_decimals: 1
+      id: ${id}_co2
+    temperature:
+      name: "${name} Temperature"
+      accuracy_decimals: 2
+      id: ${id}_Temperature
+    humidity:
+      name: "${name} Humidity"
+      accuracy_decimals: 1
+      id: ${id}_Humidity
+    temperature_offset: 1.5 °C
+    address: 0x61
+    update_interval: 15s
+
+  # - platform: scd30
+  #   i2c_id: multiplex0channel5
+  #   id: ${id}_05
+  #   co2:
+  #     name: "${name} 05 CO2"
+  #     accuracy_decimals: 1
+  #     id: ${id}_05_co2
+  #   temperature:
+  #     name: "${name} 05 Temperature"
+  #     accuracy_decimals: 2
+  #     id: ${id}_05_Temperature
+  #   humidity:
+  #     name: "${name} 05 Humidity"
+  #     accuracy_decimals: 1
+  #     id: ${id}_05_Humidity
+  #   temperature_offset: 1.5 °C
+  #   address: 0x61
+  #   update_interval: 15s    
+
+  # - platform: scd30
+  #   i2c_id: multiplex0channel6
+  #   id: ${id}_06
+  #   co2:
+  #     name: "${name} 06 CO2"
+  #     accuracy_decimals: 1
+  #     id: ${id}_06_co2
+  #   temperature:
+  #     name: "${name} 06 Temperature"
+  #     accuracy_decimals: 2
+  #     id: ${id}_06_Temperature
+  #   humidity:
+  #     name: "${name} 06 Humidity"
+  #     accuracy_decimals: 1
+  #     id: ${id}_06_Humidity
+  #   temperature_offset: 1.5 °C
+  #   address: 0x61
+  #   update_interval: 15s    

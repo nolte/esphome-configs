@@ -1,0 +1,88 @@
+# include the base config like wifi and logging
+<<: !include ../include-base.yaml.snipped
+<<: !include ../include-esp32.yaml.snipped
+<<: !include ../include-esp32-i2c.yaml.snipped
+<<: !include ./poc.yaml
+
+esphome:
+  name: ${name}
+  includes:
+    - ../include/somose.h
+
+tca9548a:
+  - address: 0x70
+    id: multiplex0
+    i2c_id: bus_a
+    channels:
+      - bus_id: multiplex0channel0
+        channel: 2
+      - bus_id: multiplex0channel1
+        channel: 3
+
+# https://esphome.io/devices/esp32.html
+sensor:
+
+  - platform: somose
+    address: 0x55
+    update_interval: 15s
+    i2c_id: multiplex0channel0
+    temperature:
+        name: "somose1_temperature1"
+        unit_of_measurement: °C
+        # accuracy_decimals: 0
+    moisture:
+        name: "somose1_moisture1"
+        unit_of_measurement: '%'
+        # accuracy_decimals: 0
+
+  - platform: somose
+    address: 0x55
+    update_interval: 15s
+    i2c_id: multiplex0channel1
+    temperature:
+        name: "somose1_temperature2"
+        unit_of_measurement: °C
+        # accuracy_decimals: 0
+    moisture:
+        name: "somose1_moisture2"
+        unit_of_measurement: '%'
+        # accuracy_decimals: 0
+
+#    - platform: custom
+#      id: ${id}_soil_01
+#      #i2c_id: multiplex0channel0
+#      lambda: |-
+#          auto somose1 = new SoMoSe(0x70);
+#          App.register_component(somose1);
+#          return {somose1->temperature_sensor, somose1->moisture_sensor};
+      
+#      sensors:
+#       - name: "soil_temperature_01"
+#         unit_of_measurement: °C
+#         accuracy_decimals: 0
+#         id: ${id}_soil_01_temperature
+  
+#       - name: "soil_moisture_01"
+#         unit_of_measurement: '%'
+#         accuracy_decimals: 0
+#         id: ${id}_soil_01_moisture
+
+
+#    - platform: bh1750
+#      name: "BH1750 Illuminance"
+#      address: 0x23
+#      i2c_id: multiplex0channel0
+#      update_interval: 60s
+#   - platform: scd30
+#     co2:
+#       name: "Workshop CO2"
+#       accuracy_decimals: 1
+#     temperature:
+#       name: "Workshop Temperature"
+#       accuracy_decimals: 2
+#     humidity:
+#       name: "Workshop Humidity"
+#       accuracy_decimals: 1
+#     temperature_offset: 1.5 °C
+#     address: 0x61
+#     update_interval: 5s    

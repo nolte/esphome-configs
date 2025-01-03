@@ -1,0 +1,11 @@
+# include the base config like wifi and logging
+<<: !include ../include-base.yaml.snipped
+<<: !include ../include-esp32.yaml.snipped
+
+substitutions:
+  name: poc-esp32
+  id: poc_esp
+  comment: "ESP Poc"
+
+esphome:
+  name: ${name}

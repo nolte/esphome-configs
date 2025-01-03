@@ -1,0 +1,21 @@
+esphome:
+  name: ${name}
+  platform: ESP32
+  board: esp32dev
+  platformio_options: 
+    platform: espressif32
+    board: az-delivery-devkit-v4
+    board_build.mcu: esp32
+    board_build.f_cpu: 240000000L
+
+logger:
+  baud_rate: 115200
+
+i2c:
+  sda: 21
+  scl: 22
+  scan: true
+  id: bus_a
+  #frequency: 100kHz
+  #frequency: 50kHz
+  #timeout: 2s    

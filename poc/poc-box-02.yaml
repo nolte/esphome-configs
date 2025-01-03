@@ -1,0 +1,84 @@
+# include the base config like wifi and logging
+<<: !include ../include-base.yaml.snipped
+<<: !include ../include-esp8266.yaml.snipped
+<<: !include ../include-esp8266-i2c.yaml.snipped
+<<: !include ./poc.yaml
+
+substitutions:
+  name: poc-box-02
+  friendly_name: ${name}
+  intervall: 15s
+
+esphome:
+  name: ${name}
+  # includes:
+  #   - ../include/somose.h
+
+external_components:
+  - source: ../my_components
+    components: [ somose ]
+
+
+tca9548a:
+  - address: 0x70
+    id: multiplex0
+    i2c_id: bus_a
+    channels:
+      - bus_id: multiplex0channel2
+        channel: 2
+      - bus_id: multiplex0channel3
+        channel: 3
+      - bus_id: multiplex0channel4
+        channel: 4
+      - bus_id: multiplex0channel5
+        channel: 5
+      - bus_id: multiplex0channel6
+        channel: 6                        
+
+# https://esphome.io/devices/esp32.html
+sensor:
+  - platform: somose
+    update_interval: ${intervall}
+    i2c_id: multiplex0channel2
+    temperature:
+        name: "somose1_temperature"
+        unit_of_measurement: °C
+    moisture:
+        name: "somose1_moisture"
+        unit_of_measurement: '%'
+  - platform: somose
+    update_interval: ${intervall}
+    i2c_id: multiplex0channel3
+    temperature:
+        name: "somose2_temperature"
+        unit_of_measurement: °C
+    moisture:
+        name: "somose2_moisture"
+        unit_of_measurement: '%'
+  - platform: somose
+    update_interval: ${intervall}
+    i2c_id: multiplex0channel4
+    temperature:
+        name: "somose3_temperature"
+        unit_of_measurement: °C
+    moisture:
+        name: "somose3_moisture"
+        unit_of_measurement: '%'
+  - platform: somose
+    update_interval: ${intervall}
+    i2c_id: multiplex0channel5
+    temperature:
+        name: "somose4_temperature"
+        unit_of_measurement: °C
+    moisture:
+        name: "somose4_moisture"
+        unit_of_measurement: '%'
+  - platform: somose
+    update_interval: ${intervall}    
+    i2c_id: multiplex0channel6
+    temperature:
+        name: "somose5_temperature"
+        unit_of_measurement: °C
+    moisture:
+        name: "somose5_moisture"
+        unit_of_measurement: '%'

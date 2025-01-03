@@ -1,0 +1,73 @@
+# include the base config like wifi and logging
+<<: !include ../include-base.yaml.snipped
+<<: !include ../include-esp32.yaml.snipped
+<<: !include ../include-esp32-i2c.yaml.snipped
+<<: !include ./poc.yaml
+
+esphome:
+  name: ${name}
+
+substitutions:
+  name: poc-sensor-mix
+  id: poc_sensor_test_01
+  friendly_name: poc-mix
+
+# https://esphome.io/devices/esp32.html
+sensor:
+#   - platform: custom
+#     lambda: |-
+#       auto sht20 = new SHT20();
+#       App.register_component(sht20);
+#       return {sht20->temperature_sensor, sht20->humidity_sensor, sht20->vpd_sensor, sht20->dew_point_sensor};
+#     sensors:
+#       - name: "${name} SHT20 Temperature"
+#         id: sensor_temperature
+#         unit_of_measurement: °C
+#         accuracy_decimals: 2
+#       - name: "${name} SHT20 Humidity"
+#         id: sensor_humidity
+#         unit_of_measurement: "%"
+#         accuracy_decimals: 2
+#       - name: "${name} SHT20 Vapour-pressure deficit"
+#         id: sensor_vpd
+#         unit_of_measurement: "kPa"
+#         accuracy_decimals: 2
+#       - name: "${name} SHT20 Dew point"
+#         id: sensor_dew_point
+#         unit_of_measurement: °C
+#         accuracy_decimals: 2
+
+
+#   - platform: aht10
+#     temperature:
+#       name: "${name} DHT20 Temperature"
+#       id: ${id}_temperature
+#     humidity:
+#       name: "${name} DHT20 Humidity"
+#       id: ${id}_humidity
+#     update_interval: 60s
+
+  - platform: scd30
+    co2:
+      name: "${name} SCD30 C02"
+      accuracy_decimals: 1
+    temperature:
+      name: "${name} SCD30 Temperature"
+      accuracy_decimals: 2
+    humidity:
+      name: "${name} SCD30 Humidity"
+      accuracy_decimals: 1
+    # temperature_offset: 1.5 °C
+    address: 0x61
+    update_interval: 5s
+
+#   - platform: bme280_i2c
+#     temperature:
+#       name: "${name} BME280 Temperature"
+#       oversampling: 16x
+#     pressure:
+#       name: "${name} BME280 Pressure"
+#     humidity:
+#       name: "${name} BME280 Humidity"
+#     address: 0x76
+#     update_interval: 60s

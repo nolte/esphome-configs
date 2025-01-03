@@ -1,0 +1,46 @@
+# include the base config like wifi and logging
+<<: !include ../include-base.yaml.snipped
+<<: !include ../include-esp8266.yaml.snipped
+<<: !include ../include-esp8266-i2c.yaml.snipped
+<<: !include ./poc.yaml
+
+esphome:
+  name: ${name}
+  # includes:
+  #   - ../include/somose.h
+
+logger:
+  level: DEBUG
+#   logs:
+#     somose.component: INFO
+#     #wifi: INFO
+#     somose: INFO
+#     #i2c.arduino: INFO
+#     #api.service: INFO
+#     #mdns: INFO
+
+# https://esphome.io/devices/esp32.html
+sensor:
+  - platform: somose
+    address: 0x55
+    update_interval: 15s
+    id: my_scd41
+    temperature:
+        name: "somose1_temperature"
+        unit_of_measurement: °C
+        # accuracy_decimals: 0
+    moisture:
+        name: "somose1_moisture"
+        unit_of_measurement: '%'
+        # accuracy_decimals: 0
+
+api:
+  services:
+    - service: set_reference_dry
+      then:
+      - somose.set_reference_dry:
+          id: my_scd41
+    - service: set_reference_wet
+      then:
+      - somose.set_reference_wet:
+          id: my_scd41                  

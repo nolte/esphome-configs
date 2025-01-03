@@ -1,0 +1,10 @@
+substitutions:
+  comment: "undefine"
+  name: nous-a1t-12
+  id: nous_a1t_12
+
+packages:
+  plug: !include 
+    file: common/nous-a1t.yaml
+    vars:
+      restore_mode: RESTORE_DEFAULT_OFF

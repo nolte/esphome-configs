@@ -1,0 +1,18 @@
+substitutions:
+  name: nous-a1t-09
+  id: nous_a1t_09
+  comment: "Christmas Star"
+  time_start: "17:00:00"
+  time_end: "21:00:00"
+
+packages:
+  plug: !include
+    file: common/nous-a1t.yaml
+    vars:
+      restore_mode: RESTORE_DEFAULT_OFF
+
+  duration: !include
+    file: common/active-duration.yaml
+    vars:
+      time_start: ${time_start}
+      time_end: ${time_end}

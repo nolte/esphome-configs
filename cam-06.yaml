@@ -1,0 +1,8 @@
+substitutions:
+  name: cam-06
+  id: cam_06
+  comment: "dehumidifier 01 CAM 01"
+
+packages:
+  cam: !include 
+    file: common/esp32-cam-mb.yaml

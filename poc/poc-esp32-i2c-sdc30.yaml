@@ -1,0 +1,23 @@
+# include the base config like wifi and logging
+<<: !include ../include-base.yaml.snipped
+<<: !include ../include-esp32.yaml.snipped
+<<: !include ../include-esp32-i2c.yaml.snipped
+<<: !include ./poc.yaml
+
+esphome:
+  name: ${name}
+
+sensor:
+  - platform: scd30
+    co2:
+      name: "Workshop CO2"
+      accuracy_decimals: 1
+    temperature:
+      name: "Workshop Temperature"
+      accuracy_decimals: 2
+    humidity:
+      name: "Workshop Humidity"
+      accuracy_decimals: 1
+    #temperature_offset: 1.5 °C
+    address: 0x61
+    update_interval: 5s
