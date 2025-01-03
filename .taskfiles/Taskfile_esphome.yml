@@ -1,0 +1,49 @@
+---
+version: '3'
+
+tasks:
+  compile:
+    desc: Compile The firmeware for Given Device
+    dir: './src'
+    cmds:
+    - | 
+      docker run \
+          --rm --privileged \
+          --network host \
+          -v "${PWD}":/config \
+          -e WIFI_DOMAIN=".fritz.box" \
+          -e WIFI_SSID="$(pass network/wifi/ssid)" \
+          -e WIFI_PASSWORD="$(pass network/wifi/password)" \
+          -e WIFI_FALLBACK_PASSWORD="$(pass network/wifi/password)" \
+          -e MQTT_ENDPOINT="192.168.178.66" \
+          -e MQTT_PORT="31883" \
+          -e MQTT_USERNAME="esphome" \
+          -e MQTT_PASSWORD="notset" \
+          -e TZ="Europe/Berlin" \
+          --device=/dev/ttyUSB0 \
+          -it ghcr.io/esphome/esphome compile {{.DEVICE_FILE}}
+    - sudo mv .esphome/build/{{.DEVICE_FILE| replace ".yaml" "" }}/.pioenvs/{{.DEVICE_FILE | replace ".yaml" "" }}/firmware.bin /tmp/ 
+    - sudo chown nolte:nolte /tmp/firmware.bin
+    - echo "Compiled firemware for {{.DEVICE_FILE}} are placed at /tmp/firmware.bin"
+
+
+  run:
+    desc: Flash Device direct Direct or Over the Air
+    dir: './src'
+    cmds:
+    - | 
+      docker run \
+          --rm --privileged \
+          --network host \
+          -v "${PWD}":/config \
+          -e WIFI_DOMAIN=".fritz.box" \
+          -e WIFI_SSID="$(pass network/wifi/ssid)" \
+          -e WIFI_PASSWORD="$(pass network/wifi/password)" \
+          -e WIFI_FALLBACK_PASSWORD="$(pass network/wifi/password)" \
+          -e MQTT_ENDPOINT="192.168.178.66" \
+          -e MQTT_PORT="31883" \
+          -e MQTT_USERNAME="esphome" \
+          -e MQTT_PASSWORD="notset" \
+          -e TZ="Europe/Berlin" \
+          --device=/dev/ttyUSB0 \
+          -it ghcr.io/esphome/esphome run {{.DEVICE_FILE}}
