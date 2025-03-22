@@ -4,6 +4,6 @@ This will be controll, by given time. Usefull for christmas tree ore somethink e
 
 ```yaml
 {%
-   include "../../../src/common/active-duration.yaml"
+   include "../../src/common/active-duration.yaml"
 %}
 ```

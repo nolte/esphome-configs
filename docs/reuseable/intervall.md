@@ -4,6 +4,6 @@ Will be turn the Switch on for a short time. This can be repeated with some wait
 
 ```yaml
 {%
-   include "../../../src/common/switch-intervall.yaml"
+   include "../../src/common/switch-intervall.yaml"
 %}
 ```

@@ -1,8 +1,24 @@
 
 substitutions:
+  comment: "AirPump Fementation"
   name: nous-a1t-08
   id: nous_a1t_08
+
+
+
 
 packages:
   plug: !include 
     file: common/nous-a1t.yaml
+    vars:
+      restore_mode: ALWAYS_OFF
+  intervall: !include 
+    file: common/switch-intervall.yaml
+    vars:
+      intervall_duration_min_value: "0"
+      intervall_duration_max_value: "600"
+      intervall_duration_step: "30"
+      intervall_repeat_min_value: "0"
+      intervall_repeat_max_value: "10"
+      intervall_repeat_step: "1"
+      icon: mdi:weather-windy    

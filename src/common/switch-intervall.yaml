@@ -1,9 +1,15 @@
-
 defaults:
   restore_mode: RESTORE_DEFAULT_OFF
   intervall_duration: "10"
   intervall_repeat: "1"
+  intervall_duration_min_value: "0"
+  intervall_duration_max_value: "30"
+  intervall_duration_step: "5"
 
+  intervall_repeat_min_value: "0"
+  intervall_repeat_max_value: "5"
+  intervall_repeat_step: "1"
+  icon: "mdi:water-pump"
 
 binary_sensor:
   - platform: template
@@ -11,7 +17,6 @@ binary_sensor:
     id: ${id}_intervall_plump_status
     lambda: |-
       return id(${id}_intervall).is_running();
-
 
 switch:
   - platform: template
@@ -44,47 +49,54 @@ switch:
       - script.wait: ${id}_intervall_stop
 
 script:
-
-- id: ${id}_intervall_stop
-  then:
+  - id: ${id}_intervall_stop
+    then:
       - script.stop: ${id}_intervall
       - switch.turn_off: ${id}_button_switch
+      - number.set:
+          id: ${id}_repeat_counter
+          value: 0  
 
-- id: ${id}_intervall
-  then:
+
+  - id: ${id}_intervall
+    then:
       - repeat:
           count: !lambda "return id(${id}_intervall_repeat).state;"
           then:
-          - if:
-              condition:
-                lambda: 'return id(${id}_automation_active).state;'
-              then:
-              - switch.turn_on: ${id}_button_switch
-              - logger.log:
-                  format: "Waiting %.1fs"
-                  args: [ 'id(${id}_intervall_duration).state' ]      
-              - delay: !lambda "return id(${id}_intervall_duration).state * 1000;"
-              - switch.turn_off: ${id}_button_switch
-              - delay: !lambda |- 
-                  if(iteration < id(${id}_intervall_repeat).state -1 )
-                  {
-                    return id(${id}_intervall_duration).state * 1000 *2;
-                  } else {
-                    return 0;
-                  }
- 
+            - if:
+                condition:
+                  lambda: "return id(${id}_automation_active).state;"
+                then:
+                  - number.set:
+                      id: ${id}_repeat_counter
+                      value: !lambda |-
+                        return iteration;            
+                  - switch.turn_on: ${id}_button_switch
+                  - logger.log:
+                      format: "Waiting %.1fs"
+                      args: ["id(${id}_intervall_duration).state"]
+                  - delay: !lambda "return id(${id}_intervall_duration).state * 1000;"
+                  - switch.turn_off: ${id}_button_switch
+                  - delay: !lambda |-
+                      if(iteration < id(${id}_intervall_repeat).state -1 )
+                      {
+                        return id(${id}_intervall_duration).state * 1000 *2;
+                      } else {
+                        return 0;
+                      }
 
 number:
-  - platform: template
-    name: "${name} - Intervall Duration"
-    id: ${id}_intervall_duration
-    optimistic: true
-    min_value: 0
-    max_value: 30
-    initial_value: ${intervall_duration}
-    restore_value: true
-    step: 5
+  - name: "${name} - Intervall Duration"
     icon: mdi:clock-time-eight-outline
+    id: ${id}_intervall_duration
+    initial_value: ${intervall_duration}
+    max_value: ${intervall_duration_max_value}
+    min_value: ${intervall_duration_min_value}
+    optimistic: true
+    platform: template
+    restore_value: true
+    step: ${intervall_duration_step}
+    unit_of_measurement: sec
 
   - platform: template
     name: "${name} - Repeat Count"
@@ -92,17 +104,28 @@ number:
     icon: mdi:repeat
     optimistic: true
     restore_value: true
-    min_value: 0
-    max_value: 5
+    min_value: ${intervall_repeat_min_value}
+    max_value: ${intervall_repeat_max_value}
     initial_value: ${intervall_repeat}
-    step: 1
+    step: ${intervall_repeat_step}
+    unit_of_measurement: steps
+
+  - platform: template
+    name: "${name} - Repeat Counter"
+    min_value: ${intervall_repeat_min_value}
+    max_value: ${intervall_repeat_max_value}    
+    id: ${id}_repeat_counter
+    icon: mdi:repeat
+    optimistic: true
+    unit_of_measurement: step
+    initial_value: ${intervall_repeat}
+    step: ${intervall_repeat_step}    
 
 button:
-
   - platform: template
     name: "${name} - Intervall"
     id: ${id}_intervall_btn
-    icon: mdi:water-pump
+    icon: ${icon}
     on_press:
       - script.execute: ${id}_intervall
       - script.wait: ${id}_intervall
@@ -110,7 +133,7 @@ button:
   - platform: template
     name: "${name} - Stop"
     id: ${id}_stop
-    icon: mdi:water-pump
+    icon: ${icon}
     on_press:
       - script.execute: ${id}_intervall_stop
       - script.wait: ${id}_intervall_stop

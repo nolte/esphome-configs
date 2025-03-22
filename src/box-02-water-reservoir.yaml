@@ -1,0 +1,35 @@
+# include the base config like wifi and logging
+# <<: !include ./include-base.yaml.snipped
+# <<: !include ./include-esp32.yaml.snipped
+
+substitutions:
+  name: box-02-water-reservoir
+  id: box_02_water_reservoir
+  comment: "Box 02 Water reservoir Monitor"
+
+logger:
+  level: ERROR
+  #logs:
+  #  mqtt.component: DEBUG
+  #  mqtt.client: ERROR
+
+# esphome:
+#   name: ${name}
+
+packages:
+  board: !include 
+    file: ./common/esp3s-nodemcu-32s.yaml
+    #vars:
+    #  project_name: "Fementierungs Box"
+    #  project_version: "ESP-111" 
+
+  base: !include 
+    file: ./common/base.yaml
+    vars:
+      project_name: "watercheck.check"
+      project_version: "esp32" 
+
+  time: !include ./common/time.yaml
+
+  level: !include 
+    file: ./common/cqrobot-multi-point-photoelectric-liquid-level.yaml

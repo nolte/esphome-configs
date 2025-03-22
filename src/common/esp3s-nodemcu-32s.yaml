@@ -1,0 +1,23 @@
+esphome:
+  name: ${name}
+  #platform: ESP32
+  #board: nodemcu-32s
+  #platformio_options: 
+  #  platform: espressif32
+  #  board: nodemcu-32s
+  #  board_build.mcu: esp32
+  #  board_build.f_cpu: 240000000L
+
+# logger:
+#   baud_rate: 115200
+esp32:
+  board: nodemcu-32s
+
+i2c:
+  sda: 21
+  scl: 22
+  scan: true
+  id: bus_a
+  frequency: 100kHz
+  #frequency: 50kHz
+  #timeout: 2s    

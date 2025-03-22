@@ -1,0 +1,27 @@
+# http://www.cqrobot.wiki/index.php/Contact_Multi-point_Photoelectric_Liquid_Level_Sensor_SKU:_CQRSENYW003
+
+
+defaults:
+  cs_pin: GPIO15
+
+sensor:
+  - platform: pulse_meter
+    pin:
+      number: ${cs_pin}
+    name: "${name} - Water Level"
+    accuracy_decimals: 0
+    unit_of_measurement: lvl
+    icon: mdi:watering-can
+    #internal: 5s
+    filters:
+      - multiply: 0.01
+      - round: 0
+      - round_to_multiple_of: 10
+      - calibrate_linear:
+          method: exact
+          datapoints:
+            - 10 -> 0
+            - 30 -> 1
+            - 60 -> 2
+            - 120 -> 3
+            - 240 -> 4

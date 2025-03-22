@@ -8,8 +8,9 @@ Central Place for [esphome.io](https://esphome.io/index.html) config elements.
 ### Run
 
 ```sh
-task esphome:run DEVICE_FILE=nous-a1t-09.yaml
+task esphome:run DEVICE_FILE=nous-a1t-08.yaml
 ```
+
 ### Compile
 used for initial flashing. Mostly for switching Tasmota based devices into ESPHome.
 
