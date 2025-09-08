@@ -3,7 +3,15 @@ substitutions:
   name: gosund-sp111-01
   id: gosund_sp111_01
   comment: "Box2 Lamp"
+  time_start: "08:00:00"
+  time_end: "20:00:00"
 
 packages:
   plug: !include 
     file: common/gosund-sp111.yaml
+
+  duration: !include 
+    file: common/active-duration.yaml
+    vars:
+      time_start: ${time_start}
+      time_end: ${time_end}
