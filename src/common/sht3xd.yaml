@@ -1,0 +1,48 @@
+defaults:
+  temperature_offset: "0.0"
+  temperature_offset_max_value: "10.0"
+  temperature_offset_min_value: "-10.0"
+  temperature_offset_step: "0.5"
+
+  humidity_offset: "0.0"
+  humidity_offset_max_value: "10"
+  humidity_offset_min_value: "-10"
+  humidity_offset_step: "1"
+
+sensor:
+  - platform: sht3xd
+    temperature:
+      name: "${name} Temperature"
+      filters:
+        - offset: !lambda return id(${id}_temperature_offset).state;
+    humidity:
+      name: "${name} Humidity"
+      filters:
+        - offset: !lambda return id(${id}_humidity_offset).state;
+    address: 0x44
+    update_interval: 30s
+
+number:
+  - name: "${name} - Temperature Offset"
+    icon: mdi:clock-time-eight-outline
+    id: ${id}_temperature_offset
+    initial_value: ${temperature_offset}
+    max_value: ${temperature_offset_max_value}
+    min_value: ${temperature_offset_min_value}
+    optimistic: true
+    platform: template
+    restore_value: true
+    step: ${temperature_offset_step}
+    unit_of_measurement: Grad    
+
+  - name: "${name} - Humidity Offset"
+    icon: mdi:clock-time-eight-outline
+    id: ${id}_humidity_offset
+    initial_value: ${humidity_offset}
+    max_value: ${humidity_offset_max_value}
+    min_value: ${humidity_offset_min_value}
+    optimistic: true
+    platform: template
+    restore_value: true
+    step: ${humidity_offset_step}
+    unit_of_measurement: "%"

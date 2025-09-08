@@ -1,0 +1,9 @@
+---
+substitutions:
+  name: esp32-s3-box-3-02
+  id: esp32_s3_box_3_02
+  comment: "esp32-s3-box-3 02"
+
+packages:
+  plug: !include 
+    file: common/esp32-s3-box-3.yaml

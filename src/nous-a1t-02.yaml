@@ -11,3 +11,5 @@ packages:
       restore_mode: ALWAYS_OFF
   intervall: !include 
     file: common/switch-intervall.yaml
+    vars:
+      intervall_duration_max_value: 480    
