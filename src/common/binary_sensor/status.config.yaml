@@ -1,3 +1,4 @@
 platform: status
 name: "${name} - Status"
 device_class: connectivity
+id: ${id}_status
