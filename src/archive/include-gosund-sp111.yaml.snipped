@@ -16,7 +16,7 @@ packages:
       project_version: "SP-111" 
   time: !include common/time.yaml
   hlw8012: !include
-    file: common/hlw8012.yaml
+    file: common/sensor/hlw8012.yaml
     vars:
       cf_pin: GPIO05
       cf1_pin: GPIO04

@@ -7,21 +7,4 @@ substitutions:
   comment: "Box4 CAM 01"
 ```
 
-## Base Device Config
-
-```yaml
-packages:
-  base: !include 
-    file: ./base.yaml
-    vars:
-      project_name: "ESP.Smart-Wifi-CAM"
-      project_version: "espcam32
-```
-
-### Full Config
-
-```yaml
-{%
-   include "../../src/common/base.yaml"
-%}
-```
+more examples at [Common Configs](../packages/common.md)

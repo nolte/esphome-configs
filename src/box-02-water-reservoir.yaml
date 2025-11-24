@@ -32,4 +32,4 @@ packages:
   time: !include ./common/time.yaml
 
   level: !include 
-    file: ./common/cqrobot-multi-point-photoelectric-liquid-level.yaml
+    file: ./common/sensor/cqrobot-multi-point-photoelectric-liquid-level.yaml

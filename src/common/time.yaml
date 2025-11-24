@@ -1,3 +1,5 @@
+# Reuseable module for sync the local device Time with running Home assistant
+# more information at https://esphome.io/components/time/homeassistant/
 time:
   - platform: homeassistant
     id: ${id}_homeassistant_time

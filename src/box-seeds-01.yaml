@@ -14,4 +14,4 @@ packages:
       project_version: "ESP-111" 
 
   intervall: !include 
-    file: common/sht3xd.yaml
+    file: common/sensor/sht3xd.yaml

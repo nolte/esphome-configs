@@ -12,7 +12,7 @@ esphome:
 
 packages:
   cam: !include 
-    file: ../common/cqrobot-multi-point-photoelectric-liquid-level.yaml
+    file: ../common/sensor/cqrobot-multi-point-photoelectric-liquid-level.yaml
 
 # # http://www.cqrobot.wiki/index.php/Contact_Multi-point_Photoelectric_Liquid_Level_Sensor_SKU:_CQRSENYW003
 # sensor:

@@ -1,0 +1,4 @@
+# Sensore
+
+Different preconfigured Sensores.
+  

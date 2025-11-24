@@ -11,7 +11,7 @@ packages:
       project_name: "NOUS.Smart-Wifi-Socket"
       project_version: "A1T"  
   time: !include common/time.yaml
-  hlw8012: !include common/hlw8012.yaml
+  hlw8012: !include common/sensor/hlw8012.yaml
 
 
 light:

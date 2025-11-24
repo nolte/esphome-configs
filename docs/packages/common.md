@@ -1,5 +1,6 @@
 # Common Configs
 
+Will be configure a Basement for different device Types. This will be allow the same Configuration like WIFI, and some Management settings, for all the Different devices. More information about Variable Usage take a look to esphome [substitutions](https://esphome.io/components/substitutions/).
 
 ## Usage
 
@@ -14,7 +15,7 @@ packages:
   ...
 ```      
 
-## Configuration Parts
+## Implementation
 
 ```yaml
 {%
