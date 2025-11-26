@@ -7,4 +7,4 @@ repository:
   name: esphome-configs
   description: Small Reuseable parts wor works with esphome
   homepage: https://nolte.github.io/esphome-configs
-  topics: iot, esphome, diy
+  topics: iot, esphome, smart-home
