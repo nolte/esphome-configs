@@ -5,6 +5,6 @@ _extends: gh-plumbing:.github/commons-settings.yml
 
 repository:
   name: esphome-configs
-  description: Small Reuseable parts wor works with esphome
+  description: Small Reuseable parts for works with esphome
   homepage: https://nolte.github.io/esphome-configs
   topics: iot, esphome, smart-home
