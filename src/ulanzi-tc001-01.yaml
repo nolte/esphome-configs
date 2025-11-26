@@ -4,7 +4,7 @@ substitutions:
   id: ulanzi
 
 packages:
-  plug: !include 
+  plug: !include
     file: common/ulanzi-tc001.yaml
     vars:
       restore_mode: RESTORE_DEFAULT_OFF

@@ -20,11 +20,11 @@ logger:
   baud_rate: 0
 
 packages:
-  base: !include 
+  base: !include
     file: ./base.yaml
     vars:
       project_name: "GOSUND.Smart-Wifi-Socket"
-      project_version: "SP-111" 
+      project_version: "SP-111"
   time: !include ./time.yaml
   hlw8012: !include
     file: ./sensor/hlw8012.yaml
@@ -68,7 +68,7 @@ switch:
     turn_off_action:
       - switch.turn_off: relay
       - output.turn_off: led_red
-  
+
   - platform: gpio
     restore_mode: ${restore_mode}
     pin: GPIO15

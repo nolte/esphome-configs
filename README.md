@@ -1,7 +1,7 @@
 # ESPHome Config
 
 Central Place for [esphome.io](https://esphome.io/index.html) config elements. Small reuseable  
-yaml structrure for create a Self Hosted DIY IOT device plattform, this allow for example same named sensores over different device types. With focus for  "Don`t repeat yourself" coding style. 
+yaml structrure for create a Self Hosted DIY IOT device plattform, this allow for example same named sensores over different device types. With focus for  "Don`t repeat yourself" coding style.
 
 ## Structure
 
@@ -36,7 +36,7 @@ task esphome:compile DEVICE_FILE=nous-a1t-09.yaml
 
 ### With Inventory
 
-Load the device config by Ansible Inventory, given configs will be presented by Local Running Netbox Deployment. 
+Load the device config by Ansible Inventory, given configs will be presented by Local Running Netbox Deployment.
 
 ```sh
 export ANSIBLE_INVENTORY=~/repos/github/argo-charts/src/applications/netbox/configuration/inventory/inventory.yaml

@@ -22,4 +22,4 @@ sensor:
     #      - 1.3 -> 100
     #      - 2.5 -> 0
     #  - lambda: if (x < 1) return 0; else return (x);
-     accuracy_decimals: 0    
+     accuracy_decimals: 0

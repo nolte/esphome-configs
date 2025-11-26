@@ -20,7 +20,7 @@ tca9548a:
     #   - bus_id: multiplex0channel6
     #     channel: 6
       - bus_id: multiplex0channel7
-        channel: 7                
+        channel: 7
 
 substitutions:
   name: poc-plant-sensore

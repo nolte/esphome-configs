@@ -33,7 +33,7 @@ tca9548a:
       - bus_id: multiplex0channel5
         channel: 5
       - bus_id: multiplex0channel6
-        channel: 6                        
+        channel: 6
 
 # https://esphome.io/devices/esp32.html
 sensor:
@@ -74,7 +74,7 @@ sensor:
         name: "somose4_moisture"
         unit_of_measurement: '%'
   - platform: somose
-    update_interval: ${intervall}    
+    update_interval: ${intervall}
     i2c_id: multiplex0channel6
     temperature:
         name: "somose5_temperature"

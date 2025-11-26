@@ -7,12 +7,12 @@ substitutions:
   time_end: 01:00:00
 
 packages:
-  plug: !include 
+  plug: !include
     file: common/gosund-sp111.yaml
     vars:
       restore_mode: RESTORE_DEFAULT_OFF
 
-  duration: !include 
+  duration: !include
     file: common/active-duration.yaml
     vars:
       time_start: ${time_start}

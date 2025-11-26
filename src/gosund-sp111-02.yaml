@@ -5,5 +5,5 @@ substitutions:
   comment: "Luftentfeuchter"
 
 packages:
-  plug: !include 
+  plug: !include
     file: common/gosund-sp111.yaml

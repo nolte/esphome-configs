@@ -5,7 +5,7 @@ substitutions:
 
 
 packages:
-  plug: !include 
+  plug: !include
     file: common/nous-a1t.yaml
     vars:
       restore_mode: RESTORE_DEFAULT_ON

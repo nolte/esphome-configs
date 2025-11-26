@@ -5,13 +5,13 @@ substitutions:
   comment: "Setzling Box"
 
 packages:
-  plug: !include 
+  plug: !include
     file: common/esp32-az-delivery.yaml
-  base: !include 
+  base: !include
     file: ./common/base.yaml
     vars:
       project_name: "Setzling_Box_01"
-      project_version: "ESP-111" 
+      project_version: "ESP-111"
 
-  intervall: !include 
+  intervall: !include
     file: common/sensor/sht3xd.yaml

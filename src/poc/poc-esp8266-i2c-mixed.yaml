@@ -55,13 +55,13 @@ sensor:
 #          auto somose1 = new SoMoSe(0x70);
 #          App.register_component(somose1);
 #          return {somose1->temperature_sensor, somose1->moisture_sensor};
-      
+
 #      sensors:
 #       - name: "soil_temperature_01"
 #         unit_of_measurement: °C
 #         accuracy_decimals: 0
 #         id: ${id}_soil_01_temperature
-  
+
 #       - name: "soil_moisture_01"
 #         unit_of_measurement: '%'
 #         accuracy_decimals: 0
@@ -85,4 +85,4 @@ sensor:
 #       accuracy_decimals: 1
 #     temperature_offset: 1.5 °C
 #     address: 0x61
-#     update_interval: 5s    
+#     update_interval: 5s

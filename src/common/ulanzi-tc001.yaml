@@ -14,11 +14,11 @@ substitutions:
   sda_pin: GPIO21
 
 packages:
-  base: !include 
+  base: !include
     file: ./base.yaml
     vars:
       project_name: "ulanzi.tc001"
-      project_version: "tc001"  
+      project_version: "tc001"
   time: !include ./time.yaml
 
 
@@ -97,14 +97,14 @@ binary_sensor:
       number: $left_button_pin
       inverted: true
     name: "${name} - Left button"
-    id: ${id}_left_button    
+    id: ${id}_left_button
   - platform: gpio
     pin:
       inverted: true
       number: $mid_button_pin
       mode: INPUT_PULLUP
     name: "${name} - Middle button"
-    id: ${id}_middle_button       
+    id: ${id}_middle_button
   - platform: gpio
     pin:
       number: $right_button_pin
@@ -122,15 +122,15 @@ sensor:
   - platform: sht3xd
     temperature:
       name: "${devicename} - Temperature"
-      id: ${id}_temperature      
+      id: ${id}_temperature
     humidity:
       name: "${devicename} - Relative Humidity"
-      id: ${id}_relative_humidity  
+      id: ${id}_relative_humidity
     update_interval: 60s
   - platform: adc
     pin: $battery_pin
     name: "${devicename} - Battery"
-    id: ${id}_battery_voltage      
+    id: ${id}_battery_voltage
     update_interval: 10s
     device_class: battery
     accuracy_decimals: 0
@@ -150,7 +150,7 @@ sensor:
     unit_of_measurement: '%'
   - platform: adc
     name: "${devicename} - Illuminance"
-    id: ${id}_light_sensor    
+    id: ${id}_light_sensor
     pin: $ldr_pin
     update_interval: 10s
     attenuation: auto

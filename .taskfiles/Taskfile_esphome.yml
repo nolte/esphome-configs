@@ -6,7 +6,7 @@ tasks:
     desc: Compile The firmeware for Given Device
     dir: './src'
     cmds:
-    - | 
+    - |
       docker run \
           --rm --privileged \
           --network host \
@@ -22,7 +22,7 @@ tasks:
           -e TZ="Europe/Berlin" \
           --device=/dev/ttyUSB0 \
           -it ghcr.io/esphome/esphome compile {{.DEVICE_FILE}}
-    - sudo mv .esphome/build/{{.DEVICE_FILE| replace ".yaml" "" }}/.pioenvs/{{.DEVICE_FILE | replace ".yaml" "" }}/firmware.bin /tmp/ 
+    - sudo mv .esphome/build/{{.DEVICE_FILE| replace ".yaml" "" }}/.pioenvs/{{.DEVICE_FILE | replace ".yaml" "" }}/firmware.bin /tmp/
     - sudo chown nolte:nolte /tmp/firmware.bin
     - echo "Compiled firemware for {{.DEVICE_FILE}} are placed at /tmp/firmware.bin"
 
@@ -31,7 +31,7 @@ tasks:
     desc: Flash Device direct Direct or Over the Air
     dir: './src'
     cmds:
-    - | 
+    - |
       docker run \
           --rm --privileged \
           --network host \

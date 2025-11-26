@@ -26,4 +26,4 @@ binary_sensor:
     name: "jinou_beacon_01"
   - platform: ble_presence
     mac_address: !env_var BT_BEACON_02
-    name: "jinou_beacon_02"   
+    name: "jinou_beacon_02"

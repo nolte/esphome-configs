@@ -1,5 +1,5 @@
 # for planting lights
-defaults: 
+defaults:
   time_start: 07:00:00
   time_end: 01:00:00
   timezone: Europe/Berlin

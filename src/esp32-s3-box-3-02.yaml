@@ -5,5 +5,5 @@ substitutions:
   comment: "esp32-s3-box-3 02"
 
 packages:
-  plug: !include 
+  plug: !include
     file: common/esp32-s3-box-3.yaml

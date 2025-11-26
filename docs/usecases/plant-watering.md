@@ -14,4 +14,3 @@ The watering can be stopped each moment, by deactivate the Automation from the [
    include "../../src/nous-a1t-02.yaml"
 %}
 ```
-

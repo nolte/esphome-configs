@@ -21,7 +21,7 @@ sensor:
   - platform: dht
     pin: GPIO22
     # model: AM2302
-    
+
     temperature:
       name: "${friendly_name_temp} DHT22"
       id: ${id}_temperature_dht22

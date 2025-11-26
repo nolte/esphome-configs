@@ -20,7 +20,7 @@ esphome:
     - "ArduinoJson"
   includes:
     - include/sht20.h
-                      
+
 
 binary_sensor:
   # https://esphome.io/components/binary_sensor/status.html

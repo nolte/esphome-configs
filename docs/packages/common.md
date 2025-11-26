@@ -7,13 +7,13 @@ Will be configure a Basement for different device Types. This will be allow the 
 ```yaml
 packages:
   ...
-  base: !include 
+  base: !include
     file: ./common/base.yaml
     vars:
       project_name: "watercheck.check"
-      project_version: "esp32" 
+      project_version: "esp32"
   ...
-```      
+```  
 
 ## Implementation
 

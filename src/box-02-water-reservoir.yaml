@@ -17,19 +17,19 @@ logger:
 #   name: ${name}
 
 packages:
-  board: !include 
+  board: !include
     file: ./common/esp3s-nodemcu-32s.yaml
     #vars:
     #  project_name: "Fementierungs Box"
-    #  project_version: "ESP-111" 
+    #  project_version: "ESP-111"
 
-  base: !include 
+  base: !include
     file: ./common/base.yaml
     vars:
       project_name: "watercheck.check"
-      project_version: "esp32" 
+      project_version: "esp32"
 
   time: !include ./common/time.yaml
 
-  level: !include 
+  level: !include
     file: ./common/sensor/cqrobot-multi-point-photoelectric-liquid-level.yaml

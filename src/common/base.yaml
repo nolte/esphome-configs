@@ -1,7 +1,7 @@
 defaults:
   project_name: "NOUS.Smart-Wifi-Socket"
   project_version: "A1T"
-  
+
 esphome:
   name: ${name}
   comment: ${comment}

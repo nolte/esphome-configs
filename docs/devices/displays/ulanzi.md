@@ -1,4 +1,4 @@
-# Ulanzi TC001 Smart Pixel 
+# Ulanzi TC001 Smart Pixel
 
 Use [lubeda/EspHoMaTriXv2](https://github.com/lubeda/EspHoMaTriXv2) for integrate [Ulanzi TC001 Smart Pixel](https://www.ulanzi.de/products/ulanzi-pixel-smart-uhr-2882?redirected=true) into our smart home System as Pixel Display.
 

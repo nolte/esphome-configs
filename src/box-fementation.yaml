@@ -15,17 +15,17 @@ substitutions:
 #   board: az-delivery-devkit-v4
 
 packages:
-  board: !include 
+  board: !include
     file: ./common/esp32-az-delivery.yaml
     #vars:
     #  project_name: "Fementierungs Box"
-    #  project_version: "ESP-111" 
+    #  project_version: "ESP-111"
 
-  base: !include 
+  base: !include
     file: ./common/base.yaml
     vars:
       project_name: "Fementierungs Box"
-      project_version: "ESP-111" 
+      project_version: "ESP-111"
 
   time: !include ./common/time.yaml
 
@@ -45,9 +45,9 @@ packages:
 #       - bus_id: multiplex0channel6
 #         channel: 6
 #       - bus_id: multiplex0channel7
-#         channel: 7  
+#         channel: 7
 
-sensor: 
+sensor:
   - platform: scd30
     # i2c_id: multiplex0channel7
     id: ${id}
@@ -84,7 +84,7 @@ sensor:
   #     id: ${id}_05_Humidity
   #   temperature_offset: 1.5 °C
   #   address: 0x61
-  #   update_interval: 15s    
+  #   update_interval: 15s
 
   # - platform: scd30
   #   i2c_id: multiplex0channel6
@@ -103,4 +103,4 @@ sensor:
   #     id: ${id}_06_Humidity
   #   temperature_offset: 1.5 °C
   #   address: 0x61
-  #   update_interval: 15s    
+  #   update_interval: 15s

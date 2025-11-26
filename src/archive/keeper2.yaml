@@ -32,7 +32,7 @@ sensor:
       name: "${friendly_name_humidity} DHT20"
       id: ${id}_humidity
     update_interval: 10s
-  
+
   - platform: bh1750
     name: "BH1750 Illuminance"
     address: 0x23
@@ -59,7 +59,7 @@ sensor:
       id: ${id}_color_temperature
     glass_attenuation_factor: 1.0
     address: 0x29
-    update_interval: 60s    
+    update_interval: 60s
 #   - platform: custom
 #     id: ${id}_soil_01
 #     lambda: |-
@@ -75,4 +75,4 @@ sensor:
 #         unit_of_measurement: '%'
 #         accuracy_decimals: 0
 #         id: ${id}_soil_01_moisture
-    
+

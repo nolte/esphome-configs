@@ -96,11 +96,11 @@ logger:
 #     - script.execute: draw_display
 
 packages:
-  base: !include 
+  base: !include
     file: ./base.yaml
     vars:
       project_name: "esp32-s3-box-3"
-      project_version: "esp32-s3-box-3" 
+      project_version: "esp32-s3-box-3"
   time: !include ./time.yaml
 
 # captive_portal:

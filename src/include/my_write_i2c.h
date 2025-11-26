@@ -31,10 +31,10 @@ public:
             temp = register_value; // Swap in the new value
 
             Wire.beginTransmission(byte(0x55)); 	// transmit to device
-            Wire.write(byte(0x41));      		// command change address 
+            Wire.write(byte(0x41));      		// command change address
             Wire.write(byte((0x56 << 1) & 0xFE));   	// new address, 7-bit
             Wire.endTransmission();      		// stop transmitting
-            
+
         }
 
     }

@@ -5,11 +5,11 @@ esp8266:
   early_pin_init: False
 
 packages:
-  base: !include 
+  base: !include
     file: common/base.yaml
     vars:
       project_name: "NOUS.Smart-Wifi-Socket"
-      project_version: "A1T"  
+      project_version: "A1T"
   time: !include common/time.yaml
   hlw8012: !include common/sensor/hlw8012.yaml
 

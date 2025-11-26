@@ -15,11 +15,11 @@ esp8266:
   early_pin_init: False
 
 packages:
-  base: !include 
+  base: !include
     file: ./base.yaml
     vars:
       project_name: "NOUS.Smart-Wifi-Socket"
-      project_version: "A1T"  
+      project_version: "A1T"
   time: !include ./time.yaml
   hlw8012: !include ./sensor/hlw8012.yaml
 
@@ -65,4 +65,3 @@ switch:
     restore_mode: ${restore_mode}
     pin: GPIO14
     id: ${id}_relay
-

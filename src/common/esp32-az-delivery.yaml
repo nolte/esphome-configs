@@ -2,7 +2,7 @@ esphome:
   name: ${name}
   #platform: ESP32
   #board: esp32dev
-  platformio_options: 
+  platformio_options:
     platform: espressif32
     #board: az-delivery-devkit-v4
     board_build.mcu: esp32
@@ -22,4 +22,4 @@ i2c:
   id: bus_a
   #frequency: 100kHz
   #frequency: 50kHz
-  #timeout: 2s    
+  #timeout: 2s

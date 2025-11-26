@@ -47,4 +47,4 @@ sensor:
 #     - service: set_reference_wet
 #       then:
 #       - somose.set_reference_wet:
-#           id: my_scd41                  
+#           id: my_scd41

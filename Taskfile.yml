@@ -4,10 +4,10 @@ version: '3'
 vars:
   PYTHON_VENVS_BASEDIR: ~/.venvs/
   TASK_COLLECTION_BASE: https://raw.githubusercontent.com/nolte/taskfiles/develop/src
-  
+
 
 includes:
-  mkdocs: 
+  mkdocs:
     taskfile: "{{.TASK_COLLECTION_BASE}}/taskfile-include-mkdocs.yaml"
     vars:
       MKDOCS_PORT: 8002
@@ -18,4 +18,3 @@ tasks:
     cmds:
     - task -l
     silent: true
-

@@ -4,5 +4,5 @@ substitutions:
   comment: "Box2 CAM 02"
 
 packages:
-  cam: !include 
+  cam: !include
     file: common/esp32-cam-mb.yaml

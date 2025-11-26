@@ -8,11 +8,11 @@ substitutions:
 
 
 packages:
-  plug: !include 
+  plug: !include
     file: common/nous-a1t.yaml
     vars:
       restore_mode: ALWAYS_OFF
-  intervall: !include 
+  intervall: !include
     file: common/switch-intervall.yaml
     vars:
       intervall_duration_min_value: "0"
@@ -21,4 +21,4 @@ packages:
       intervall_repeat_min_value: "0"
       intervall_repeat_max_value: "10"
       intervall_repeat_step: "1"
-      icon: mdi:weather-windy    
+      icon: mdi:weather-windy

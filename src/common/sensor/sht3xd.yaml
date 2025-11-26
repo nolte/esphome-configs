@@ -33,7 +33,7 @@ number:
     platform: template
     restore_value: true
     step: ${temperature_offset_step}
-    unit_of_measurement: Grad    
+    unit_of_measurement: Grad
 
   - name: "${name} - Humidity Offset"
     icon: mdi:clock-time-eight-outline

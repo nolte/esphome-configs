@@ -35,4 +35,3 @@ light:
   - platform: monochromatic
     output: led
     name: espcam_02 light
-

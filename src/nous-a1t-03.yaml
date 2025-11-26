@@ -3,7 +3,5 @@ substitutions:
   id: nous_a1t_03
 
 packages:
-  plug: !include 
+  plug: !include
     file: common/nous-a1t.yaml
-
-

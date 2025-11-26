@@ -55,7 +55,7 @@ script:
       - switch.turn_off: ${id}_button_switch
       - number.set:
           id: ${id}_repeat_counter
-          value: 0  
+          value: 0
 
 
   - id: ${id}_intervall
@@ -70,7 +70,7 @@ script:
                   - number.set:
                       id: ${id}_repeat_counter
                       value: !lambda |-
-                        return iteration;            
+                        return iteration;
                   - switch.turn_on: ${id}_button_switch
                   - logger.log:
                       format: "Waiting %.1fs"
@@ -113,13 +113,13 @@ number:
   - platform: template
     name: "${name} - Repeat Counter"
     min_value: ${intervall_repeat_min_value}
-    max_value: ${intervall_repeat_max_value}    
+    max_value: ${intervall_repeat_max_value}
     id: ${id}_repeat_counter
     icon: mdi:repeat
     optimistic: true
     unit_of_measurement: step
     initial_value: ${intervall_repeat}
-    step: ${intervall_repeat_step}    
+    step: ${intervall_repeat_step}
 
 button:
   - platform: template

@@ -14,9 +14,9 @@ sensor:
     id: RegenWert
     internal: true
     update_interval: 10s
-    accuracy_decimals: 1    
+    accuracy_decimals: 1
     unit_of_measurement: 'V'
-  
+
   - platform: template
     name: "Regen Sensor Volt"
     unit_of_measurement: "V"

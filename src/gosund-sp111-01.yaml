@@ -7,10 +7,10 @@ substitutions:
   time_end: "20:00:00"
 
 packages:
-  plug: !include 
+  plug: !include
     file: common/gosund-sp111.yaml
 
-  duration: !include 
+  duration: !include
     file: common/active-duration.yaml
     vars:
       time_start: ${time_start}

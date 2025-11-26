@@ -38,7 +38,7 @@ tca9548a:
     #   - bus_id: multiplex0channel6
     #     channel: 6
       - bus_id: multiplex0channel7
-        channel: 2      
+        channel: 2
 
 
 sensor:
@@ -71,7 +71,7 @@ sensor:
 #         unit_of_measurement: °C
 #     moisture:
 #         name: "${id}_4_moisture"
-#         unit_of_measurement: '%'        
+#         unit_of_measurement: '%'
   # - platform: somose
   #   address: 0x55
   #   update_interval: 15s
@@ -102,4 +102,4 @@ sensor:
         unit_of_measurement: °C
     moisture:
         name: "${id}_7_moisture"
-        unit_of_measurement: '%'        
+        unit_of_measurement: '%'
