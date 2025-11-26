@@ -1,0 +1,10 @@
+---
+# These settings are synced to GitHub by https://probot.github.io/apps/settings/
+
+_extends: gh-plumbing:.github/commons-settings.yml
+
+repository:
+  name: esphome-configs
+  description: Small Reuseable parts wor works with esphome
+  homepage: https://nolte.github.io/esphome-configs
+  topics: iot, esphome, diy
