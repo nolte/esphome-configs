@@ -7,4 +7,4 @@ substitutions:
   comment: "Box4 CAM 01"
 ```
 
-more examples at [Common Configs](../packages/common.md)
+more examples at [Common Configuration](../packages/common.md)

@@ -1,6 +1,6 @@
 # Timed Switch
 
-This will be controll, by given time. Usefull for christmas tree ore somethink else.
+This will be control, by given time. Useful for Christmas tree ore something else.
 
 ```yaml
 {%

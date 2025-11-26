@@ -1,4 +1,4 @@
-# Sensore
+# Sensor
 
-Different preconfigured Sensores.
+Different configured Sensors.
   

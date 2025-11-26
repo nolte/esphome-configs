@@ -1,8 +1,8 @@
 # Plant Watering
 
-Use a External Trigger, like `HomeAssistant`, for start a watering intervall.
+Use a External Trigger, like `HomeAssistant`, for start a watering interval.
 
-The watering can be stopped everey moment, by deactivate the Automation from the [Intervall](/packages/intervall/) Switch Implementation.
+The watering can be stopped each moment, by deactivate the Automation from the [Interval](../packages/intervall.md) Switch Implementation.
 
 
 ## Configuration

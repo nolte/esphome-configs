@@ -7,3 +7,6 @@
 __pycache__
 __init__.py
 .task/remote
+
+.github/styles/*
+!.github/styles/.keep

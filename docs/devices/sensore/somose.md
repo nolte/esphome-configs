@@ -1,4 +1,4 @@
-# somose
+# SoMoSe
 
 * [BeFlE/SoMoSe](https://github.com/BeFlE/SoMoSe)
 
