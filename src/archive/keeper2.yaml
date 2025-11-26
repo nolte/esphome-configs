@@ -75,4 +75,3 @@ sensor:
 #         unit_of_measurement: '%'
 #         accuracy_decimals: 0
 #         id: ${id}_soil_01_moisture
-
