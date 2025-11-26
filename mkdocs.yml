@@ -18,5 +18,3 @@ markdown_extensions:
   - pymdownx.highlight:
   - toc:
       permalink: True
-extra_css:
-  - css/overwrite.css
