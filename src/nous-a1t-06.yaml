@@ -4,8 +4,8 @@ substitutions:
   name: nous-a1t-06
   id: nous_a1t_06
   comment: "Lamp Box 01"
-  time_start: 07:00:00
-  time_end: 01:00:00
+  time_start: "17:00:00"
+  time_end: "11:00:00"
 
 packages:
   nous: !include
