@@ -1,0 +1,143 @@
+substitutions:
+  name: gosund-sp111-07
+  id: gosund_sp111_07
+  comment: "osmoses timer"
+
+packages:
+  plug: !include
+    file: common/gosund-sp111.yaml
+    vars:
+      restore_mode: RESTORE_DEFAULT_OFF
+
+
+# ── Globale Variable: läuft der Timer gerade? ────────────────
+globals:
+  - id: timer_running
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
+# ── Timer-Dauer (300–2400 Sek, sekundengenau, persistent) ───
+number:
+  - platform: template
+    id: timer_duration
+    name: "${name} - Timer Dauer"
+    icon: mdi:timer-outline
+    unit_of_measurement: "s"
+    min_value: 30          # 5 Minuten
+    max_value: 2400         # 40 Minuten
+    step: 1                 # sekundengenau
+    initial_value: 900      # Default: 15 Minuten
+    restore_value: true     # ← persistiert im Flash
+    optimistic: true
+
+
+
+# ── Timer-Script ─────────────────────────────────────────────
+#   mode: restart  → neuer Start überschreibt laufenden Timer
+#   Das delay wird per Lambda dynamisch aus timer_duration
+#   berechnet (zur Script-Laufzeit, nicht zur Compile-Zeit).
+#
+#   Ablauf nach Timer-Ende:
+#     globals.set false → switch.turn_off → turn_off_action im
+#     Package schaltet Relay + LED aus + ruft script.stop auf
+#     (idempotent, da Script ohnehin fertig ist).
+script:
+  - id: timer_script
+    mode: restart
+    then:
+      - globals.set:
+          id: timer_running
+          value: 'true'
+      - logger.log:
+          format: "Timer gestartet: %.0f Sekunden"
+          args: ['id(timer_duration).state']
+      - delay: !lambda |-
+          return (uint32_t)(id(timer_duration).state * 1000.0f);
+      - globals.set:
+          id: timer_running
+          value: 'false'
+      - logger.log: "Timer abgelaufen, Steckdose AUS"
+      - switch.turn_off: ${id}_button_switch
+
+# ── !extend: Template-Switch um Timer-Hooks erweitern ────────
+#   Das Package definiert ${id}_button_switch bereits mit:
+#     turn_on_action:  relay AN + led_red AN
+#     turn_off_action: relay AUS + led_red AUS
+#   Wir hängen unsere Timer-Logik additiv daran.
+switch:
+  - id: !extend ${id}_button_switch
+    turn_on_action:
+      - script.execute: timer_script
+    turn_off_action:
+      - script.stop: timer_script
+      - globals.set:
+          id: timer_running
+          value: 'false'
+
+# ── !extend: Button um Langer-Druck-Abbruch erweitern ────────
+#   Das Package definiert on_press (Toggle) – bleibt erhalten.
+#   on_click für langen Druck wird additiv hinzugefügt.
+#
+#   Kurzdruck-Verhalten (via on_press Toggle aus Package):
+#     Relay AUS → Kurzdruck → turn_on → Timer startet  ✓
+#     Relay AN  → Kurzdruck → turn_off → Timer abbricht ✓
+#
+#   Langer Druck: on_press (toggle) feuert bei Drücken,
+#   on_click (long) feuert beim Loslassen → turn_off ist
+#   dann idempotent falls Timer schon gestoppt.
+binary_sensor:
+  - id: !extend ${id}_button_state
+    on_click:
+      - min_length: 1000ms
+        max_length: 10000ms
+        then:
+          - logger.log: "Timer per Langer Druck abgebrochen"
+          - switch.turn_off: ${id}_button_switch
+
+
+  - platform: homeassistant
+    id: water_leak_sensor
+    entity_id: binary_sensor.sjcgq11lm_09_water_leak
+    internal: true
+    on_press:
+      - logger.log: "Wasserleck erkannt, Timer abbrechen!"
+      - switch.turn_off: ${id}_button_switch
+
+
+# ── Home Assistant Buttons ───────────────────────────────────
+button:
+  - platform: template
+    name: "${name} - Timer Starten"
+    icon: mdi:timer-play-outline
+    on_press:
+      - switch.turn_on: ${id}_button_switch   # mode:restart → auch Neustart
+
+  - platform: template
+    name: "${name} - Timer Abbrechen"
+    icon: mdi:timer-off-outline
+    on_press:
+      - switch.turn_off: ${id}_button_switch
+
+# ── Status-Sensor für Home Assistant ─────────────────────────
+text_sensor:
+  - platform: template
+    name: "${name} - Timer Status"
+    icon: mdi:information-outline
+    lambda: |-
+      if (id(timer_running)) {
+        int sek = (int)id(timer_duration).state;
+        char buf[48];
+        if (sek >= 60)
+          snprintf(buf, sizeof(buf), "Lauft (%d min %d s)", sek / 60, sek % 60);
+        else
+          snprintf(buf, sizeof(buf), "Lauft (%d s)", sek);
+        return std::string(buf);
+      } else if (id(relay).state) {
+        return std::string("Eingeschaltet (kein Timer)");
+      } else {
+        return std::string("Aus");
+      }
+    update_interval: 10s
+
+
