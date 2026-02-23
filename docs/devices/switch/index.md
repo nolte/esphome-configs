@@ -1,7 +1,7 @@
-# Smart Plugs
+# Smart plugs
 
 This section covers the two supported smart plug hardware profiles. Both share the same
-underlying architecture — this page documents everything they have in common.
+underlying architecture - this page documents everything they have in common.
 
 Device-specific pages cover only what differs between them:
 
@@ -12,8 +12,8 @@ Device-specific pages cover only what differs between them:
 
 ## Shared Hardware
 
-Both plug types use the **ESP8285** — an ESP8266 with 1 MB of flash integrated in the same
-package — and the **HLW8012** chip for energy measurement. The chip is configured as a standard
+Both plug types use the **ESP8285** - an ESP8266 with 1 MB of flash integrated in the same
+package - and the **HLW8012** chip for energy measurement. The chip is configured as a standard
 `esp8266` target with `board: esp8285` in ESPHome.
 
 ---
@@ -32,7 +32,7 @@ ${id}_button_switch  (switch.template)  ← exposed to Home Assistant
 The **gpio switch** (the actual relay) is not exposed to Home Assistant directly. All control
 goes through the **template switch**, which also drives the LED alongside the relay.
 
-The template switch runs in **optimistic mode** — it assumes the command succeeded immediately
+The template switch runs in **optimistic mode** - it assumes the command succeeded immediately
 and updates its state in the UI without waiting for hardware confirmation.
 
 ---
@@ -49,7 +49,7 @@ binary_sensor:
       - switch.toggle: "${id}_button_switch"
 ```
 
-The button binary sensor is internal — it is not exposed to Home Assistant.
+The button binary sensor is internal - it is not exposed to Home Assistant.
 
 ---
 
@@ -72,8 +72,8 @@ Both packages share the same calibration defaults:
 
 | Variable      | Default   | Effect                                                 |
 | ------------- | --------- | ------------------------------------------------------ |
-| `current_res` | `0.00280` | Shunt resistor — higher → lower current / watt reading |
-| `voltage_div` | `775`     | Voltage divider — lower → lower voltage reading        |
+| `current_res` | `0.00280` | Shunt resistor - higher → lower current / watt reading |
+| `voltage_div` | `775`     | Voltage divider - lower → lower voltage reading        |
 
 These can be overridden per device as `vars` when including the package.
 
