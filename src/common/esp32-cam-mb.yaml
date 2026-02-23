@@ -1,5 +1,3 @@
-
-
 packages:
   base: !include
     file: ./base.yaml
@@ -9,50 +7,53 @@ packages:
 
 # Enable logging
 logger:
-    #level: VERBOSE
-    tx_buffer_size: 256
-    baud_rate: 115200
+  #level: VERBOSE
+  tx_buffer_size: 512
+  baud_rate: 0
 
 esp32:
-    #board: esp32cam
-    board: esp32dev
-    framework:
-        type: arduino
-
+  #board: esp32cam
+  board: esp32dev
+  framework:
+    type: arduino
+  flash_size: 4MB # explizit angeben
+psram: # ← FEHLT komplett!
 esp32_camera:
-    name: ${name}
-    id: ${id}
-    external_clock:
-        pin: GPIO0
-        frequency: 8MHz #10MHz
-    i2c_pins:
-        sda: GPIO26
-        scl: GPIO27
-    data_pins: [GPIO5, GPIO18, GPIO19, GPIO21, GPIO36, GPIO39, GPIO34, GPIO35]
-    vsync_pin: GPIO25
-    href_pin: GPIO23
-    pixel_clock_pin: GPIO22
-    power_down_pin: GPIO32
-    resolution: 1920x1080 #800x600 #1024x768 #640x480
-    jpeg_quality: 30 # max. 63
-    #max_framerate: 1.0fps
-    #idle_framerate: 0.2fps
-    vertical_flip: true
-    horizontal_mirror: false
-    brightness: 2 # -2 to 2
-    contrast: 1 # -2 to 2
-    special_effect: none
-    # exposure settings
-    aec_mode: auto
-    aec2: false
-    ae_level: 0
-    aec_value: 300
-    # gain settings
-    agc_mode: auto
-    agc_gain_ceiling: 2x
-    agc_value: 0
-    # white balance setting
-    wb_mode: auto
+  name: ${name}
+  id: ${id}
+  external_clock:
+    pin: GPIO0
+    frequency: 20MHz #10MHz
+  i2c_pins:
+    sda: GPIO26
+    scl: GPIO27
+  data_pins: [GPIO5, GPIO18, GPIO19, GPIO21, GPIO36, GPIO39, GPIO34, GPIO35]
+  vsync_pin: GPIO25
+  href_pin: GPIO23
+  pixel_clock_pin: GPIO22
+  power_down_pin: GPIO32
+  resolution: 1024x768 #800x600 #1024x768 #640x480
+  jpeg_quality: 10 # max. 63
+  max_framerate: 5fps # stabil bei 1024x768
+  idle_framerate: 0.1fps #
+  #max_framerate: 1.0fps
+  #idle_framerate: 0.2fps
+  vertical_flip: true
+  horizontal_mirror: false
+  brightness: 2 # -2 to 2
+  contrast: 1 # -2 to 2
+  special_effect: none
+  # exposure settings
+  aec_mode: auto
+  aec2: false
+  ae_level: 0
+  aec_value: 300
+  # gain settings
+  agc_mode: auto
+  agc_gain_ceiling: 2x
+  agc_value: 0
+  # white balance setting
+  wb_mode: auto
 
 esp32_camera_web_server:
   - port: 8080
@@ -61,28 +62,106 @@ esp32_camera_web_server:
     mode: snapshot
 
 output:
-    # white LED
-    - platform: ledc
-      channel: 2
-      pin: GPIO4
-      id: ${id}_espCamLED
-    # red status light
-    - platform: gpio
-      pin:
-          number: GPIO33
-          inverted: True
-      id: ${id}_gpio_33
-light:
-    - platform: monochromatic
-      output: ${id}_espCamLED
-      name: ${name} light
-      id: ${id}_light
-    - platform: binary
-      output: ${id}_gpio_33
-      name: ${name} led
-      id: ${id}_led
+  # white LED
+  - platform: ledc
+    #channel: 2
+    pin: GPIO4
+    id: ${id}_espCamLED
+    frequency: 100000Hz
+  # red status light
+  - platform: gpio
+    pin:
+      number: GPIO33
+      inverted: True
+    id: ${id}_gpio_33
 
+light:
+  - platform: monochromatic
+    output: ${id}_espCamLED
+    name: ${name} light
+    id: ${id}_light
+    restore_mode: ALWAYS_OFF
+  - platform: binary
+    output: ${id}_gpio_33
+    name: ${name} led
+    id: ${id}_led
+    restore_mode: ALWAYS_OFF
 switch:
-    - platform: restart
-      name: ${name} restart
-      id: ${id}_restart
+  - platform: restart
+    name: ${name} restart
+    id: ${id}_restart
+
+script:
+  - id: ${id}_all_lights_off
+    then:
+      - light.turn_off: ${id}_light
+      - light.turn_off: ${id}_led
+      - logger.log: "🌙 Night: All LEDs deactivated"
+
+  - id: ${id}_apply_camera_mode
+    then:
+      - lambda: |-
+          sensor_t *s = esp_camera_sensor_get();
+          if (s == nullptr) {
+            ESP_LOGE("CAM", "Kein Kamera-Sensor gefunden!");
+            return;
+          }
+
+          std::string mode = id(${id}_camera_mode).current_option();
+
+          if (mode == "Tag") {
+            s->set_aec2(s, 0);
+            s->set_gainceiling(s, GAINCEILING_2X);
+            s->set_ae_level(s, 0);
+            s->set_aec_value(s, 300);
+            s->set_brightness(s, 2);
+            s->set_quality(s, 10);
+            ESP_LOGI("CAM", "Modus: Tag aktiv");
+
+          } else if (mode == "Nacht") {
+            s->set_aec2(s, 1);
+            s->set_gainceiling(s, GAINCEILING_128X);
+            s->set_ae_level(s, 2);
+            s->set_aec_value(s, 1200);
+            s->set_brightness(s, 2);
+            s->set_quality(s, 15);
+            ESP_LOGI("CAM", "Modus: Nacht aktiv");
+
+          } else if (mode == "Nacht + LED") {
+            s->set_aec2(s, 0);
+            s->set_gainceiling(s, GAINCEILING_4X);
+            s->set_ae_level(s, 0);
+            s->set_aec_value(s, 300);
+            s->set_brightness(s, 2);
+            s->set_quality(s, 10);
+            ESP_LOGI("CAM", "Modus: Nacht + LED aktiv");
+          }
+
+      - if:
+          condition:
+            lambda: return id(${id}_camera_mode).current_option() == "Nacht + LED";
+          then:
+            - light.turn_on:
+                id: ${id}_light
+                brightness: 50%
+                transition_length: 500ms
+          else:
+            - light.turn_off:
+                id: ${id}_light
+                transition_length: 500ms
+
+select:
+  - platform: template
+    name: ${name} Kamera Modus
+    id: ${id}_camera_mode
+    icon: mdi:camera-iris
+    options:
+      - "Tag"
+      - "Nacht"
+      - "Nacht + LED"
+    initial_option: "Tag"
+    restore_value: true
+    optimistic: true
+    on_value:
+      then:
+        - script.execute: ${id}_apply_camera_mode

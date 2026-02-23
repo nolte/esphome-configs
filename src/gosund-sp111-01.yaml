@@ -3,8 +3,8 @@ substitutions:
   name: gosund-sp111-01
   id: gosund_sp111_01
   comment: "Box2 Lamp"
-  time_start: "08:00:00"
-  time_end: "20:00:00"
+  time_start: "21:00:00"
+  time_end: "09:00:00"
 
 packages:
   plug: !include
