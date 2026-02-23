@@ -27,9 +27,9 @@
 defaults:
   timer_switch_id: "${id}_button_switch"
   timer_button_id: "${id}_button_state"
-  timer_min:       "300"
-  timer_max:       "2400"
-  timer_initial:   "900"
+  timer_min: "300"
+  timer_max: "2400"
+  timer_initial: "900"
   water_leak_entity: "binary_sensor.none"
 
 # ── Globale Variable ─────────────────────────────────────────
@@ -37,7 +37,7 @@ globals:
   - id: timer_running
     type: bool
     restore_value: no
-    initial_value: 'false'
+    initial_value: "false"
 
 # ── Timer-Dauer (persistent im Flash) ────────────────────────
 number:
@@ -62,16 +62,16 @@ script:
     then:
       - globals.set:
           id: timer_running
-          value: 'true'
+          value: "true"
       - switch.turn_on: ${timer_switch_id}
       - logger.log:
           format: "Timer gestartet: %.0f Sekunden"
-          args: ['id(timer_duration).state']
+          args: ["id(timer_duration).state"]
       - delay: !lambda |-
           return (uint32_t)(id(timer_duration).state * 1000.0f);
       - globals.set:
           id: timer_running
-          value: 'false'
+          value: "false"
       - logger.log: "Timer abgelaufen – Steckdose AUS"
       - switch.turn_off: ${timer_switch_id}
 
@@ -83,7 +83,7 @@ switch:
       - script.stop: timer_script
       - globals.set:
           id: timer_running
-          value: 'false'
+          value: "false"
 
 # ── binary_sensor: alle Einträge in EINER Liste ──────────────
 binary_sensor:
