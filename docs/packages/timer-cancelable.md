@@ -40,7 +40,7 @@ src/
 | `switch.turn_off` | Relay OFF + cancels timer if running |
 
 The switch and timer are intentionally decoupled. Turning the switch on manually does **not**
-start a countdown. Use the "Timer Starten" button or a long press on the physical button to
+start a countdown. Use the "Timer started" button or a long press on the physical button to
 start the timer.
 
 ### Physical Button

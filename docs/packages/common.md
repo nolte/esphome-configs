@@ -111,7 +111,7 @@ alongside the fallback AP, providing a browser-based interface for Wi-Fi provisi
 | ---------------- | ----------------- | ------------------------------------------ |
 | `logger`         | defaults          | Serial logging at INFO level               |
 | `api`            | no encryption     | Native API for Home Assistant — no key set |
-| `ota`            | platform: esphome | No password set                            |
+| `ota`            | `platform: esphome` | No password set                            |
 | `web_server`     | defaults          | Local UI at port 80                        |
 | `prometheus`     | —                 | Metrics endpoint at `/metrics`             |
 | `captive_portal` | —                 | Active only when fallback AP is running    |

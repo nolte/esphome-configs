@@ -1,4 +1,4 @@
-# Timmed
+# Timed
 
 **Package:** `src/common/active-duration.yaml`
 
