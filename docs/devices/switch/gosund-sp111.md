@@ -5,8 +5,8 @@
 **Energy chip:** HLW8012  
 **ESPHome device database:** https://devices.esphome.io/devices/Gosund-SP111
 
-For shared behaviour across all smart plug packages — relay pattern, button wiring,
-energy measurement and `restore_mode` — see the [Smart Plugs index](index.md).
+For shared behaviour across all smart plug packages - relay pattern, button wiring,
+energy measurement and `restore_mode` - see the [Smart Plugs index](index.md).
 
 ---
 
@@ -14,12 +14,12 @@ energy measurement and `restore_mode` — see the [Smart Plugs index](index.md).
 
 | GPIO   | Direction | Function          | Notes                                       |
 | ------ | --------- | ----------------- | ------------------------------------------- |
-| GPIO00 | Output    | Red LED           | Inverted — HIGH = off                       |
-| GPIO02 | Output    | Blue LED (status) | Inverted — HIGH = off                       |
+| GPIO00 | Output    | Red LED           | Inverted - HIGH = off                       |
+| GPIO02 | Output    | Blue LED (status) | Inverted - HIGH = off                       |
 | GPIO04 | Input     | HLW8012 CF1       | Current / voltage frequency signal          |
 | GPIO05 | Input     | HLW8012 CF        | Active power frequency signal               |
-| GPIO12 | Output    | HLW8012 SEL       | Inverted — selects current vs. voltage mode |
-| GPIO13 | Input     | Button            | `INPUT_PULLUP`, inverted — LOW = pressed    |
+| GPIO12 | Output    | HLW8012 SEL       | Inverted - selects current vs. voltage mode |
+| GPIO13 | Input     | Button            | `INPUT_PULLUP`, inverted - LOW = pressed    |
 | GPIO15 | Output    | Relay             | HIGH = on                                   |
 
 ---
@@ -30,7 +30,7 @@ The SP111 has two physically separate LEDs with distinct roles:
 
 | ID         | Colour | Component       | Controlled by                                                             |
 | ---------- | ------ | --------------- | ------------------------------------------------------------------------- |
-| `led_blue` | Blue   | `status_led`    | ESPHome automatically — blinks during Wi-Fi connect, solid when API is up |
+| `led_blue` | Blue   | `status_led`    | ESPHome automatically - blinks during Wi-Fi connect, solid when API is up |
 | `led_red`  | Red    | `output` (gpio) | Template switch `turn_on_action` / `turn_off_action`                      |
 
 The blue LED requires no manual control. The red LED is toggled explicitly to mirror the
@@ -49,7 +49,7 @@ turn_off_action:
 
 ## Relay & Switch Logic
 
-The SP111 template switch uses **optimistic mode only** — there is no `lambda` to read back
+The SP111 template switch uses **optimistic mode only** - there is no `lambda` to read back
 the hardware relay state. The relay ID is a global `relay` (not scoped with `${id}_`):
 
 ```yaml
@@ -101,9 +101,9 @@ logger:
   baud_rate: 0
 ```
 
-- **`framework: version: recommended`** — Pins ESPHome to the recommended Arduino core
+- **`framework: version: recommended`** - Pins ESPHome to the recommended Arduino core
   version for this chip, avoiding regressions from automatic updates.
-- **`baud_rate: 0`** — Disables serial logging. The TX/RX pins are not accessible inside
+- **`baud_rate: 0`** - Disables serial logging. The TX/RX pins are not accessible inside
   the SP111 enclosure, so serial output would be wasted and could interfere with HLW8012
   communication on shared pins.
 
