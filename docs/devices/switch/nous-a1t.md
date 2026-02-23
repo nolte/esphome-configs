@@ -5,8 +5,8 @@
 **Energy chip:** HLW8012  
 **ESPHome device database:** https://devices.esphome.io/devices/Nous-A1t
 
-For shared behaviour across all smart plug packages — relay pattern, button wiring,
-energy measurement and `restore_mode` — see the [Smart Plugs index](index.md).
+For shared behaviour across all smart plug packages - relay pattern, button wiring,
+energy measurement and `restore_mode` - see the [Smart Plugs index](index.md).
 
 ---
 
@@ -15,8 +15,8 @@ energy measurement and `restore_mode` — see the [Smart Plugs index](index.md).
 | GPIO   | Direction | Function    | Notes                                       |
 | ------ | --------- | ----------- | ------------------------------------------- |
 | GPIO00 | Input     | Button      | `INPUT_PULLUP`, active LOW (not inverted)   |
-| GPIO12 | Output    | HLW8012 SEL | Inverted — selects current vs. voltage mode |
-| GPIO13 | Output    | LED         | Inverted — HIGH = off                       |
+| GPIO12 | Output    | HLW8012 SEL | Inverted - selects current vs. voltage mode |
+| GPIO13 | Output    | LED         | Inverted - HIGH = off                       |
 | GPIO04 | Input     | HLW8012 CF  | Active power frequency signal               |
 | GPIO05 | Input     | HLW8012 CF1 | Current / voltage frequency signal          |
 | GPIO14 | Output    | Relay       | HIGH = on                                   |
@@ -39,7 +39,7 @@ light:
 
 Using `light` instead of a bare `status_led` or `output` serves two purposes:
 
-- The LED participates in the same `restore_mode` cycle as the relay — it restores its
+- The LED participates in the same `restore_mode` cycle as the relay - it restores its
   state correctly after a power cycle.
 - The template switch can control the LED with `light.turn_on` / `light.turn_off` actions,
   keeping LED state in sync with the relay at all times.
@@ -72,7 +72,7 @@ switch:
 ```
 
 The lambda ensures the switch state shown in Home Assistant always reflects the actual relay
-state — even after a reboot where the relay might have restored to a different state than
+state - even after a reboot where the relay might have restored to a different state than
 what the template switch would have assumed on its own.
 
 The hardware relay (`${id}_relay`) uses a **scoped ID** (prefixed with `${id}_`) unlike the
@@ -90,10 +90,10 @@ esp8266:
   early_pin_init: False
 ```
 
-- **`restore_from_flash: true`** — Persists the last relay state to flash memory so it can
+- **`restore_from_flash: true`** - Persists the last relay state to flash memory so it can
   be restored after a power cycle. This is what makes `RESTORE_DEFAULT_OFF` and
   `RESTORE_DEFAULT_ON` work correctly on this device.
-- **`early_pin_init: False`** — Disables GPIO initialisation before the SDK boots. Without
+- **`early_pin_init: False`** - Disables GPIO initialisation before the SDK boots. Without
   this, GPIO14 (the relay) might briefly pulse during boot, causing an unwanted relay click.
 
 ---
