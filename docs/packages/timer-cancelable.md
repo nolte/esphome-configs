@@ -34,9 +34,9 @@ src/
 
 ### Switch
 
-| Action | Result |
-|---|---|
-| `switch.turn_on` | Relay ON — **no timer started** |
+| Action            | Result                               |
+| ----------------- | ------------------------------------ |
+| `switch.turn_on`  | Relay ON — **no timer started**      |
 | `switch.turn_off` | Relay OFF + cancels timer if running |
 
 The switch and timer are intentionally decoupled. Turning the switch on manually does **not**
@@ -45,10 +45,10 @@ start the timer.
 
 ### Physical Button
 
-| Action | Result |
-|---|---|
-| Short press (<1s) | Toggle relay (no timer) |
-| Long press (>1s) | Start timer → relay ON + countdown |
+| Action            | Result                             |
+| ----------------- | ---------------------------------- |
+| Short press (<1s) | Toggle relay (no timer)            |
+| Long press (>1s)  | Start timer → relay ON + countdown |
 
 ### Water Leak Sensor
 
@@ -56,33 +56,33 @@ When the configured Home Assistant binary sensor transitions to `on`, the relay 
 immediately — regardless of whether the timer is running or the relay was switched on manually.
 
 !!! note
-    The water leak sensor requires an active Home Assistant API connection. If HA is offline,
-    the last known state is retained on the ESP.
+The water leak sensor requires an active Home Assistant API connection. If HA is offline,
+the last known state is retained on the ESP.
 
 ## Package Parameters
 
 All parameters are optional. Defaults are designed for the Gosund SP111 plug.
 
-| Parameter | Default | Description |
-|---|---|---|
-| `timer_switch_id` | `${id}_button_switch` | ID of the template switch from the hardware package |
-| `timer_button_id` | `${id}_button_state` | ID of the physical button binary sensor |
-| `timer_min` | `300` | Minimum timer duration in seconds (5 min) |
-| `timer_max` | `2400` | Maximum timer duration in seconds (40 min) |
-| `timer_initial` | `900` | Default timer duration in seconds (15 min) |
-| `water_leak_entity` | `binary_sensor.none` | Home Assistant entity ID of the water leak sensor |
+| Parameter           | Default               | Description                                         |
+| ------------------- | --------------------- | --------------------------------------------------- |
+| `timer_switch_id`   | `${id}_button_switch` | ID of the template switch from the hardware package |
+| `timer_button_id`   | `${id}_button_state`  | ID of the physical button binary sensor             |
+| `timer_min`         | `300`                 | Minimum timer duration in seconds (5 min)           |
+| `timer_max`         | `2400`                | Maximum timer duration in seconds (40 min)          |
+| `timer_initial`     | `900`                 | Default timer duration in seconds (15 min)          |
+| `water_leak_entity` | `binary_sensor.none`  | Home Assistant entity ID of the water leak sensor   |
 
 ## Home Assistant Entities
 
 The following entities are exposed to Home Assistant after integration:
 
-| Entity | Type | Description |
-|---|---|---|
-| `{name} - Timer Dauer` | `number` | Duration slider in seconds |
-| `{name} - Timer Starten` | `button` | Starts the timer (relay ON + countdown) |
-| `{name} - Timer Abbrechen` | `button` | Stops the timer and switches relay OFF |
-| `{name} - Timer Aktiv` | `binary_sensor` | `on` while countdown is running |
-| `{name} - Timer Status` | `text_sensor` | Human-readable status string |
+| Entity                     | Type            | Description                             |
+| -------------------------- | --------------- | --------------------------------------- |
+| `{name} - Timer Dauer`     | `number`        | Duration slider in seconds              |
+| `{name} - Timer Starten`   | `button`        | Starts the timer (relay ON + countdown) |
+| `{name} - Timer Abbrechen` | `button`        | Stops the timer and switches relay OFF  |
+| `{name} - Timer Aktiv`     | `binary_sensor` | `on` while countdown is running         |
+| `{name} - Timer Status`    | `text_sensor`   | Human-readable status string            |
 
 ## Usage
 
@@ -111,13 +111,13 @@ packages:
 ### Custom duration range
 
 ```yaml
-  timer: !include
-    file: common/timer-plug.yaml
-    vars:
-      water_leak_entity: binary_sensor.sjcgq11lm_09_water_leak
-      timer_min:     "60"     # 1 minute minimum
-      timer_max:     "3600"   # 60 minutes maximum
-      timer_initial: "1800"   # 30 minutes default
+timer: !include
+  file: common/timer-plug.yaml
+  vars:
+    water_leak_entity: binary_sensor.sjcgq11lm_09_water_leak
+    timer_min: "60" # 1 minute minimum
+    timer_max: "3600" # 60 minutes maximum
+    timer_initial: "1800" # 30 minutes default
 ```
 
 ### Different plug hardware
@@ -139,10 +139,10 @@ packages:
   timer: !include
     file: common/timer-plug.yaml
     vars:
-      timer_switch_id:    "nous_a1t_timer_button_switch"
-      timer_button_id:    "nous_a1t_timer_button_state"
-      water_leak_entity:  binary_sensor.sjcgq11lm_03_water_leak
-      timer_max:          "3600"
+      timer_switch_id: "nous_a1t_timer_button_switch"
+      timer_button_id: "nous_a1t_timer_button_state"
+      water_leak_entity: binary_sensor.sjcgq11lm_03_water_leak
+      timer_max: "3600"
 ```
 
 ## Package Source
@@ -151,16 +151,16 @@ packages:
 defaults:
   timer_switch_id: "${id}_button_switch"
   timer_button_id: "${id}_button_state"
-  timer_min:       "300"
-  timer_max:       "2400"
-  timer_initial:   "900"
+  timer_min: "300"
+  timer_max: "2400"
+  timer_initial: "900"
   water_leak_entity: "binary_sensor.none"
 
 globals:
   - id: timer_running
     type: bool
     restore_value: no
-    initial_value: 'false'
+    initial_value: "false"
 
 number:
   - platform: template
@@ -181,16 +181,16 @@ script:
     then:
       - globals.set:
           id: timer_running
-          value: 'true'
+          value: "true"
       - switch.turn_on: ${timer_switch_id}
       - logger.log:
           format: "Timer started: %.0f seconds"
-          args: ['id(timer_duration).state']
+          args: ["id(timer_duration).state"]
       - delay: !lambda |-
           return (uint32_t)(id(timer_duration).state * 1000.0f);
       - globals.set:
           id: timer_running
-          value: 'false'
+          value: "false"
       - logger.log: "Timer elapsed – relay OFF"
       - switch.turn_off: ${timer_switch_id}
 
@@ -200,7 +200,7 @@ switch:
       - script.stop: timer_script
       - globals.set:
           id: timer_running
-          value: 'false'
+          value: "false"
 
 binary_sensor:
   - id: !extend ${timer_button_id}
