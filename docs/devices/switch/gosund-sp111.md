@@ -31,7 +31,7 @@ The SP111 has two physically separate LEDs with distinct roles:
 | ID         | Colour | Component       | Controlled by                                                             |
 | ---------- | ------ | --------------- | ------------------------------------------------------------------------- |
 | `led_blue` | Blue   | `status_led`    | ESPHome automatically - blinks during Wi-Fi connect, solid when API is up |
-| `led_red`  | Red    | `output` (gpio) | Template switch `turn_on_action` / `turn_off_action`                      |
+| `led_red`  | Red    | `output` (`gpio`) | Template switch `turn_on_action` / `turn_off_action`                      |
 
 The blue LED requires no manual control. The red LED is toggled explicitly to mirror the
 relay state:

@@ -29,7 +29,7 @@ ${id}_button_switch  (switch.template)  ← exposed to Home Assistant
         └── turn_off_action → switch.turn_off: relay / ${id}_relay
 ```
 
-The **gpio switch** (the actual relay) is not exposed to Home Assistant directly. All control
+The **`gpio` switch** (the actual relay) is not exposed to Home Assistant directly. All control
 goes through the **template switch**, which also drives the LED alongside the relay.
 
 The template switch runs in **optimistic mode** - it assumes the command succeeded immediately
@@ -78,7 +78,7 @@ Both packages share the same calibration defaults:
 These can be overridden per device as `vars` when including the package.
 
 > ⚠️ **Safety:** The HLW8012 circuit references mains voltage on its digital GND.
-> Never touch the GPIOs while the device is plugged into mains power.
+> Never touch the GPIO pins while the device is plugged into mains power.
 
 ---
 
