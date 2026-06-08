@@ -104,8 +104,8 @@ logger:
 - **`framework: version: recommended`** - Pins ESPHome to the recommended Arduino core
   version for this chip, avoiding regressions from automatic updates.
 - **`baud_rate: 0`** - Disables serial logging. The TX/RX pins aren't accessible inside
-  the SP111 enclosure, so serial output would be wasted and could interfere with HLW8012
-  communication on shared pins.
+  the SP111 enclosure, so serial output would be wasted there. It could also interfere with
+  HLW8012 communication on shared pins.
 
 ---
 

@@ -34,17 +34,17 @@ The automation can be paused without changing the schedule.
 
 ## Exposed Entities
 
-### `${id}_automation_active` — Switch
+### `${id}_automation_active` (switch)
 
 Enables or disables the automation without touching the schedule. When off, the `on_time`
 triggers still fire but the scripts take no action.
 
-### `${name} - Start` — Datetime (type: time)
+### `${name} - Start` (Datetime entity)
 
 Stores the switch-on time. Editable from Home Assistant. Fires `${id}_intervall_start`
 every day when the device clock reaches this value.
 
-### `${name} - End` — Datetime (type: time)
+### `${name} - End` (Datetime entity)
 
 Stores the switch-off time. Editable from Home Assistant. Fires `${id}_intervall_stop`
 every day when the device clock reaches this value.
@@ -63,7 +63,7 @@ clock reaches End time
         └── if automation_active → switch.turn_off: ${id}_button_switch
 ```
 
-The scripts act as a guard layer — disabling `automation_active` prevents any switch action
+The scripts act as a guard layer—disabling `automation_active` prevents any switch action
 without removing or changing the scheduled times.
 
 ---
@@ -92,7 +92,7 @@ internet access is available for NTP.
 ## Midnight Crossover
 
 Start and end times are handled as independent daily triggers. A window that spans midnight
-— such as `time_start: 22:00:00`, `time_end: 06:00:00` — works correctly: the device
+(for example `time_start: 22:00:00`, `time_end: 06:00:00`) works correctly: the device
 switches on at 22:00 and off at 06:00 the following morning.
 
 ---
@@ -101,6 +101,6 @@ switches on at 22:00 and off at 06:00 the following morning.
 
 |                                |                                                          |
 | ------------------------------ | -------------------------------------------------------- |
-| `src/common/time.yaml`         | Separate HA-based time source — not used by this package |
+| `src/common/time.yaml`         | Separate HA-based time source—not used by this package |
 | `src/common/nous-a1t.yaml`     | Defines `${id}_button_switch` this package controls      |
 | `src/common/gosund-sp111.yaml` | Defines `${id}_button_switch` this package controls      |

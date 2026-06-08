@@ -5,18 +5,18 @@ description: "Reusable ESPHome timer package for smart plugs with Home Assistant
 
 # Timer Plug Package
 
-The `timer-plug` package adds a flexible countdown timer to any ESPHome smart plug. It is designed
-to be hardware-agnostic and works alongside existing plug packages (e.g. `gosund-sp111.yaml`).
+The `timer-cancelable` package adds a flexible countdown timer to any ESPHome smart plug. It's designed
+to be hardware-agnostic and works alongside existing plug packages (for example `gosund-sp111.yaml`).
 
-The timer is controlled entirely on the ESP — it continues to run even when Home Assistant is offline.
+The timer is controlled entirely on the ESP—it continues to run even when Home Assistant is offline.
 
 ## Features
 
 - **Configurable countdown** via a Home Assistant number entity (seconds, persistent in flash)
-- **Decoupled switch** — the relay can be toggled independently from the timer
+- **Decoupled switch**: the relay can be toggled independently from the timer
 - **Long press** on the physical button starts the timer
 - **Short press** toggles the relay without touching the timer
-- **Water leak safety** — any Home Assistant binary sensor can cut power immediately
+- **Water leak safety**: any Home Assistant binary sensor can cut power immediately
 - **Timer Active** binary sensor for use in HA automations
 - **Timer Status** text sensor showing current state
 
@@ -36,7 +36,7 @@ src/
 
 | Action            | Result                               |
 | ----------------- | ------------------------------------ |
-| `switch.turn_on`  | Relay ON — **no timer started**      |
+| `switch.turn_on`  | Relay ON, **no timer started**       |
 | `switch.turn_off` | Relay OFF + cancels timer if running |
 
 The switch and timer are intentionally decoupled. Turning the switch on manually does **not**
@@ -53,7 +53,7 @@ start the timer.
 ### Water Leak Sensor
 
 When the configured Home Assistant binary sensor transitions to `on`, the relay is switched off
-immediately — regardless of whether the timer is running or the relay was switched on manually.
+immediately—regardless of whether the timer is running or the relay was switched on manually.
 
 !!! note
 The water leak sensor requires an active Home Assistant API connection. If HA is offline,
@@ -86,7 +86,7 @@ The following entities are exposed to Home Assistant after integration:
 
 ## Usage
 
-### Minimal — Gosund SP111 with water leak sensor
+### Minimal—Gosund SP111 with water leak sensor
 
 ```yaml
 # src/gosund-sp111-timer.yaml
@@ -147,7 +147,7 @@ packages:
 
 ## Package Source
 
-```yaml title="src/common/timer-plug.yaml"
+```yaml title="src/common/timer-cancelable.yaml"
 defaults:
   timer_switch_id: "${id}_button_switch"
   timer_button_id: "${id}_button_state"
@@ -262,4 +262,4 @@ text_sensor:
 
 - [ESPHome Packages](https://esphome.io/components/packages)
 - [ESPHome Substitutions](https://esphome.io/components/substitutions)
-- [Gosund SP111 Package](gosund-sp111.md)
+- [Gosund SP111 Package](../devices/switch/gosund-sp111.md)

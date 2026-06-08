@@ -1,18 +1,19 @@
 # ESPHome Config
 
-Central Place for [esphome.io](https://esphome.io/index.html) config elements. Small reuseable  
-yaml structrure for create a Self Hosted DIY IOT device plattform, this allow for example same named sensores over different device types. With focus for  "Don`t repeat yourself" coding style.
+Central place for [esphome.io](https://esphome.io/index.html) config elements. A small, reusable
+YAML structure to create a self-hosted DIY IoT device platform. It allows, for example, the same
+named sensors across different device types, with a focus on a "Don't repeat yourself" coding style.
 
 ## Structure
 
 | **Folder**          | **Description**                                                                                |
 |---------------------|------------------------------------------------------------------------------------------------|
-| `src/*.yaml`        | Each device as single yaml for supporte a delarative SetUp of different types of IOT devices.  |
-| `docs`              | MkDocs Structure for generate Documentation with relevant informations.                        |
-| `src/common/*.yaml` | Reuseable Modules for different Usecases, Devices and Sensore Types.                                                     |
+| `src/*.yaml`        | Each device as a single YAML file to support a declarative setup of different types of IoT devices. |
+| `docs`              | MkDocs structure to generate documentation with relevant information.                           |
+| `src/common/*.yaml` | Reusable modules for different use cases, devices and sensor types.                             |
 
 
-## Usefull Commands
+## Useful Commands
 
 ### Run
 
@@ -36,7 +37,7 @@ task esphome:compile DEVICE_FILE=nous-a1t-09.yaml
 
 ### With Inventory
 
-Load the device config by Ansible Inventory, given configs will be presented by Local Running Netbox Deployment.
+Load the device config by Ansible Inventory, given configs will be presented by a locally running NetBox deployment.
 
 ```sh
 export ANSIBLE_INVENTORY=~/repos/github/argo-charts/src/applications/netbox/configuration/inventory/inventory.yaml
@@ -50,5 +51,5 @@ task esphome:run \
 ## Project Structure
 
 
-* [BeFlE/SoMoSe](https://github.com/BeFlE/SoMoSe)for good Moisture sensores
+* [BeFlE/SoMoSe](https://github.com/BeFlE/SoMoSe) for good moisture sensors
 * [lubeda/EspHoMaTriXv2](https://github.com/lubeda/EspHoMaTriXv2) better Pixel Matrix Support.

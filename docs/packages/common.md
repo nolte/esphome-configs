@@ -25,8 +25,8 @@ These must be defined in the device file before including any package that pulls
 
 | Variable  | Description                                            | Example              |
 | --------- | ------------------------------------------------------ | -------------------- |
-| `name`    | Device hostname — used as ESPHome name and DNS address | `nous-a1t-01`        |
-| `comment` | Free-text description — shown in HA device info        | `"Circulation pump"` |
+| `name`    | Device hostname—used as ESPHome name and DNS address | `nous-a1t-01`        |
+| `comment` | Free-text description—shown in HA device info        | `"Circulation pump"` |
 
 ---
 
@@ -63,7 +63,7 @@ esphome:
     version: ${project_version}
 ```
 
-`name_add_mac_suffix: false` — devices use fixed, human-readable hostnames. Appending the
+Setting `name_add_mac_suffix: false` keeps devices on fixed, human-readable hostnames. Appending the
 MAC suffix would break the `use_address` DNS resolution and OTA targeting by name.
 
 ---
@@ -81,7 +81,7 @@ wifi:
     password: !env_var WIFI_FALLBACK_PASSWORD
 ```
 
-All credentials are loaded from environment variables at compile time — no secrets are
+All credentials are loaded from environment variables at compile time—no secrets are
 stored in the repository.
 
 `use_address: ${name}.fritz.box` overrides the connection target for ESPHome CLI and OTA.
@@ -90,7 +90,7 @@ DHCP leases. The `.fritz.box` suffix itself also comes from `WIFI_DOMAIN`.
 
 ### Fallback AP
 
-When the device cannot reach the configured network, it opens a Wi-Fi access point named
+When the device can't reach the configured network, it opens a Wi-Fi access point named
 `Livingroom Fallback Hotspot`. The `captive_portal` component activates automatically
 alongside the fallback AP, providing a browser-based interface for Wi-Fi provisioning.
 
@@ -100,7 +100,7 @@ alongside the fallback AP, providing a browser-based interface for Wi-Fi provisi
 | ------------------------ | ------------------------------------ |
 | `WIFI_SSID`              | Network name                         |
 | `WIFI_PASSWORD`          | Network password                     |
-| `WIFI_DOMAIN`            | Local DNS domain (e.g. `.fritz.box`) |
+| `WIFI_DOMAIN`            | Local DNS domain (for example `.fritz.box`) |
 | `WIFI_FALLBACK_PASSWORD` | Fallback AP password                 |
 
 ---
@@ -110,11 +110,11 @@ alongside the fallback AP, providing a browser-based interface for Wi-Fi provisi
 | Component        | Configuration     | Notes                                      |
 | ---------------- | ----------------- | ------------------------------------------ |
 | `logger`         | defaults          | Serial logging at INFO level               |
-| `api`            | no encryption     | Native API for Home Assistant — no key set |
+| `api`            | no encryption     | Native API for Home Assistant—no key set |
 | `ota`            | `platform: esphome` | No password set                            |
 | `web_server`     | defaults          | Local UI at port 80                        |
-| `prometheus`     | —                 | Metrics endpoint at `/metrics`             |
-| `captive_portal` | —                 | Active only when fallback AP is running    |
+| `prometheus`     |—                | Metrics endpoint at `/metrics`             |
+| `captive_portal` |—                | Active only when fallback AP is running    |
 
 > **Note on security:** `api` and `ota` run without encryption or password. This is
 > intentional for a trusted local network, but should be considered before exposing
@@ -142,7 +142,7 @@ All sensors are pulled in via `<<: !include` snippets from `src/common/`:
 | Snippet                             | Entity name                           | Type            | Update    |
 | ----------------------------------- | ------------------------------------- | --------------- | --------- |
 | `binary_sensor/status.config.yaml`  | `${name} - Status`                    | `binary_sensor` | on change |
-| `sensor/uptime.config.yaml`         | `${name} - Uptime`                    | `sensor` (s)    | 60 s      |
+| `sensor/uptime.config.yaml`         | `${name} - Uptime`                    | `sensor` (seconds) | 60 s   |
 | `sensor/wifi_signal.config.yaml`    | `${name} - WiFi Signal`               | `sensor` (dBm)  | 60 s      |
 | `text_sensor/wifi_info.config.yaml` | `${name} - IP Address` / SSID / BSSID | `text_sensor`   | on change |
 | `text_sensor/version.config.yaml`   | `${name} - ESPHome Version`           | `text_sensor`   | on boot   |

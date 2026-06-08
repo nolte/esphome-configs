@@ -21,7 +21,7 @@ A timezone-aware time source becomes available on the device under the scoped ID
 
 ## How It Works
 
-The `homeassistant` platform piggybacks on the already-established native API connection —
+The `homeassistant` platform piggybacks on the already-established native API connection, so
 no additional network configuration is required. Home Assistant pushes the current time to
 the device periodically (default: every 15 minutes) and immediately after the API connection
 is established.
@@ -30,7 +30,7 @@ If the connection is lost, the device continues running from its last known time
 synchronisation can resume.
 
 > This platform requires the native API connection to Home Assistant.
-> Devices using MQTT only cannot use this time source.
+> Devices using MQTT only can't use this time source.
 
 ---
 

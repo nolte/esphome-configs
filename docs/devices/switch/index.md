@@ -29,7 +29,7 @@ ${id}_button_switch  (switch.template)  ← exposed to Home Assistant
         └── turn_off_action → switch.turn_off: relay / ${id}_relay
 ```
 
-The **`gpio` switch** (the actual relay) is not exposed to Home Assistant directly. All control
+The **`gpio` switch** (the actual relay) isn't exposed to Home Assistant directly. All control
 goes through the **template switch**, which also drives the LED alongside the relay.
 
 The template switch runs in **optimistic mode** - it assumes the command succeeded immediately
@@ -49,7 +49,7 @@ binary_sensor:
       - switch.toggle: "${id}_button_switch"
 ```
 
-The button binary sensor is internal - it is not exposed to Home Assistant.
+The button binary sensor is internal - it isn't exposed to Home Assistant.
 
 ---
 

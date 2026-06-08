@@ -22,7 +22,7 @@ defaults:
 ## Purpose
 
 Extends a device with a repeating on/off cycle for `${id}_button_switch`. Designed for
-pump control — turn the pump on for a set duration, off for a pause, and repeat N times.
+pump control—turn the pump on for a set duration, off for a pause, and repeat N times.
 All parameters are adjustable at runtime from Home Assistant and survive reboots.
 
 ---
@@ -65,14 +65,14 @@ All parameters are adjustable at runtime from Home Assistant and survive reboots
 
 | ID                    | Name                  | Description                                                |
 | --------------------- | --------------------- | ---------------------------------------------------------- |
-| `${id}_intervall_btn` | `${name} - Intervall` | Starts one full cycle. Does not block further interaction. |
+| `${id}_intervall_btn` | `${name} - Intervall` | Starts one full cycle. Doesn't block further interaction. |
 | `${id}_stop`          | `${name} - Stop`      | Stops any running cycle immediately.                       |
 
 ### Binary Sensor
 
 | ID                             | Name              | Description                                       |
 | ------------------------------ | ----------------- | ------------------------------------------------- |
-| `${id}_intervall_plump_status` | `Intervall Plump` | `true` while `${id}_intervall` script is running. |
+| `${id}_intervall_pump_status` | `Intervall Pump` | `true` while `${id}_intervall` script is running. |
 
 ---
 
@@ -91,7 +91,7 @@ for iteration 0 … repeat_count - 1:
 ```
 
 The pause between iterations is always twice the on-time. The final iteration has no trailing
-pause — the cycle ends immediately after the last switch-off.
+pause—the cycle ends immediately after the last switch-off.
 
 ### Stop behaviour
 
@@ -111,7 +111,7 @@ This script is shared by the Stop button, the `automation_active` turn-off actio
 
 ## `automation_active` Guard
 
-The `${id}_automation_active` switch does not pause the cycle mid-run — it guards each
+The `${id}_automation_active` switch doesn't pause the cycle mid-run—it guards each
 individual iteration. If `automation_active` is turned off while a cycle is running, the
 current iteration completes and subsequent iterations are skipped because the lambda
 condition fails.
