@@ -1,0 +1,147 @@
+# ============================================================
+#  Package: common/timer-plug.yaml
+#
+#  Wiederverwendbare Timer-Logik für Template-Switch Plugs.
+#  Erwartet dass das Hardware-Package (z.B. gosund-sp111.yaml)
+#  bereits eingebunden ist und folgende IDs bereitstellt:
+#    - ${timer_switch_id}  → Template-Switch (Relay-Steuerung)
+#    - ${timer_button_id}  → Physischer Taster (binary_sensor)
+#    - relay               → GPIO-Switch
+#
+#  Parameter (alle optional, defaults siehe unten):
+#    timer_switch_id     ID des Template-Switch
+#    timer_button_id     ID des physischen Tasters
+#    timer_min           Min. Dauer in Sekunden  (default: 300  =  5 Min)
+#    timer_max           Max. Dauer in Sekunden  (default: 2400 = 40 Min)
+#    timer_initial       Start-Dauer in Sekunden (default: 900  = 15 Min)
+#    water_leak_entity   HA entity_id des Wasserleck-Sensors
+#
+#  Verhalten:
+#    Kurzdruck Taster    → Switch Toggle (kein Timer)
+#    Langer Druck (>1s)  → Timer starten
+#    HA Button Starten   → Timer starten
+#    HA Button Abbrechen → Timer + Switch AUS
+#    Wasserleck          → Switch AUS (immer, auch ohne Timer)
+# ============================================================
+
+defaults:
+  timer_switch_id: "${id}_button_switch"
+  timer_button_id: "${id}_button_state"
+  timer_min: "300"
+  timer_max: "2400"
+  timer_initial: "900"
+  water_leak_entity: "binary_sensor.none"
+
+# ── Globale Variable ─────────────────────────────────────────
+globals:
+  - id: timer_running
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+# ── Timer-Dauer (persistent im Flash) ────────────────────────
+number:
+  - platform: template
+    id: timer_duration
+    name: "${name} - Timer Dauer"
+    icon: mdi:timer-outline
+    unit_of_measurement: "s"
+    min_value: ${timer_min}
+    max_value: ${timer_max}
+    step: 1
+    initial_value: ${timer_initial}
+    restore_value: true
+    optimistic: true
+
+# ── Timer-Script ─────────────────────────────────────────────
+#   Das Script schaltet den Switch selbst ein/aus.
+#   switch.turn_on bleibt dadurch unabhängig nutzbar.
+script:
+  - id: timer_script
+    mode: restart
+    then:
+      - globals.set:
+          id: timer_running
+          value: "true"
+      - switch.turn_on: ${timer_switch_id}
+      - logger.log:
+          format: "Timer gestartet: %.0f Sekunden"
+          args: ["id(timer_duration).state"]
+      - delay: !lambda |-
+          return (uint32_t)(id(timer_duration).state * 1000.0f);
+      - globals.set:
+          id: timer_running
+          value: "false"
+      - logger.log: "Timer abgelaufen – Steckdose AUS"
+      - switch.turn_off: ${timer_switch_id}
+
+# ── !extend: Template-Switch ─────────────────────────────────
+#   turn_off_action: laufenden Timer immer sauber beenden
+switch:
+  - id: !extend ${timer_switch_id}
+    turn_off_action:
+      - script.stop: timer_script
+      - globals.set:
+          id: timer_running
+          value: "false"
+
+# ── binary_sensor: alle Einträge in EINER Liste ──────────────
+binary_sensor:
+  # Langer Druck → Timer starten; Kurzdruck → Toggle (Package)
+  - id: !extend ${timer_button_id}
+    on_click:
+      - min_length: 1000ms
+        max_length: 10000ms
+        then:
+          - logger.log: "Timer per Langer Druck gestartet"
+          - script.execute: timer_script
+
+  # Wasserleck-Sensor aus HA → Switch AUS (immer)
+  - platform: homeassistant
+    id: water_leak_sensor
+    entity_id: ${water_leak_entity}
+    internal: true
+    on_press:
+      - logger.log: "Wasserleck erkannt – Steckdose AUS!"
+      - switch.turn_off: ${timer_switch_id}
+
+  # Zeigt in HA ob der Timer gerade läuft
+  - platform: template
+    id: timer_active
+    name: "${name} - Timer Aktiv"
+    icon: mdi:timer-check-outline
+    device_class: running
+    lambda: |-
+      return id(timer_running);
+
+# ── Home Assistant Buttons ───────────────────────────────────
+button:
+  - platform: template
+    name: "${name} - Timer Starten"
+    icon: mdi:timer-play-outline
+    on_press:
+      - script.execute: timer_script
+
+  - platform: template
+    name: "${name} - Timer Abbrechen"
+    icon: mdi:timer-off-outline
+    on_press:
+      - switch.turn_off: ${timer_switch_id}
+
+# ── Status-Sensor ────────────────────────────────────────────
+text_sensor:
+  - platform: template
+    name: "${name} - Timer Status"
+    icon: mdi:information-outline
+    lambda: |-
+      if (id(timer_running)) {
+        char buf[48];
+        int sek = (int)id(timer_duration).state;
+        snprintf(buf, sizeof(buf), "Lauft (%d min %02d s)", sek / 60, sek % 60);
+        return std::string(buf);
+      } else if (id(relay).state) {
+        return std::string("Eingeschaltet (kein Timer)");
+      } else {
+        return std::string("Aus");
+      }
+    update_interval: 10s

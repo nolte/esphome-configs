@@ -1,0 +1,114 @@
+# ─────────────────────────────────────────────────────────────────
+# kill-sensor.yaml
+#
+# Schaltet einen Stecker (${id}_button_switch) sofort ab,
+# sobald ein Home-Assistant Binary-Sensor (z. B. Wassersensor) auslöst.
+#
+# Pflicht-Variablen
+#   kill_sensor_entity  – HA entity_id des Binary Sensors
+#                         (z. B. binary_sensor.sjcgq11lm_10_water_leak)
+#
+# Optionale Variablen (mit Defaults)
+#   kill_auto_restore   – "true"  → Stecker wird wieder eingeschaltet,
+#                          sobald der Kill-Sensor auf OFF geht
+#                         "false" → manuelles Reset nötig (Default)
+# ─────────────────────────────────────────────────────────────────
+
+defaults:
+  kill_auto_restore: "false"
+
+# ── Globale Flag: Wurde durch Kill-Sensor ausgeschaltet? ──────────
+globals:
+  - id: ${id}_killed_by_sensor
+    type: bool
+    restore_value: false
+    initial_value: "false"
+
+# ── Home-Assistant Binary-Sensor importieren ──────────────────────
+binary_sensor:
+  - platform: homeassistant
+    id: ${id}_kill_sensor
+    entity_id: ${kill_sensor_entity}
+    # Zustand wird lokal gecacht – funktioniert auch nach kurzer API-Unterbrechung
+    publish_initial_state: true
+
+    on_press:
+      # Kill-Sensor ausgelöst → sofort abschalten
+      - globals.set:
+          id: ${id}_killed_by_sensor
+          value: "true"
+      - switch.turn_off: ${id}_button_switch
+      - component.update: ${id}_kill_status
+      - logger.log:
+          format: "[kill-sensor] %s hat ausgelöst → %s abgeschaltet"
+          args:
+            - '"${kill_sensor_entity}"'
+            - '"${name}"'
+
+    on_release:
+      # Sensor wieder OK
+      - if:
+          condition:
+            lambda: "return ${kill_auto_restore};"
+          then:
+            - globals.set:
+                id: ${id}_killed_by_sensor
+                value: "false"
+            - switch.turn_on: ${id}_button_switch
+            - component.update: ${id}_kill_status
+            - logger.log:
+                format: "[kill-sensor] %s ist wieder OK → %s eingeschaltet"
+                args:
+                  - '"${kill_sensor_entity}"'
+                  - '"${name}"'
+          else:
+            # Auto-Restore deaktiviert: Flag bleibt gesetzt, nur Log
+            - component.update: ${id}_kill_status
+            - logger.log:
+                format: "[kill-sensor] %s ist wieder OK – manuelles Reset erforderlich"
+                args:
+                  - '"${kill_sensor_entity}"'
+
+# ── Reset-Button: Kill-Flag löschen und Stecker wieder einschalten ─
+button:
+  - platform: template
+    name: "${name} - Kill Reset"
+    icon: mdi:shield-refresh-outline
+    entity_category: config
+    on_press:
+      - if:
+          condition:
+            # Nur freigeben wenn der Sensor aktuell nicht mehr aktiv ist
+            lambda: "return !id(${id}_kill_sensor).state;"
+          then:
+            - globals.set:
+                id: ${id}_killed_by_sensor
+                value: "false"
+            - switch.turn_on: ${id}_button_switch
+            - component.update: ${id}_kill_status
+            - logger.log:
+                format: "[kill-sensor] Reset: %s freigegeben und eingeschaltet"
+                args:
+                  - '"${name}"'
+          else:
+            - logger.log:
+                format: "[kill-sensor] Reset verweigert – %s ist noch aktiv!"
+                args:
+                  - '"${kill_sensor_entity}"'
+
+# ── Diagnose-Sensor: Zeigt in HA ob der Kill aktiv ist ───────────
+text_sensor:
+  - platform: template
+    name: "${name} - Kill Status"
+    id: ${id}_kill_status
+    icon: mdi:shield-alert-outline
+    entity_category: diagnostic
+    update_interval: never
+    lambda: |-
+      if (id(${id}_killed_by_sensor)) {
+        return {"GESPERRT"};
+      }
+      if (id(${id}_kill_sensor).state) {
+        return {"SENSOR AKTIV"};
+      }
+      return {"OK"};

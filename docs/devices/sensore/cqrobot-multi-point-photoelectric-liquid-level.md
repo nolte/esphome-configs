@@ -5,6 +5,9 @@
 
 ## Usage
 
+This sensor reports the liquid level at several fixed points along a tank, so you can track its
+level as it fills or empties. Include the shared component below in a device file.
+
 ## Implementation
 
 ```yaml

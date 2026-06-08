@@ -1,8 +1,11 @@
 # Plant Watering
 
-Use a External Trigger, like `HomeAssistant`, for start a watering interval.
+Use an external trigger, such as a Home Assistant automation, to start a watering interval. The
+[Interval switch](../packages/intervall.md) package runs the pump for a set duration and repeats
+the cycle a configured number of times.
 
-The watering can be stopped each moment, by deactivate the Automation from the [Interval](../packages/intervall.md) Switch Implementation.
+You can stop the watering at any time by disabling the automation from the
+[Interval switch](../packages/intervall.md).
 
 
 ## Configuration

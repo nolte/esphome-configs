@@ -13,8 +13,8 @@ defaults:
 
 binary_sensor:
   - platform: template
-    name: "Intervall Plump"
-    id: ${id}_intervall_plump_status
+    name: "Intervall Pump"
+    id: ${id}_intervall_pump_status
     lambda: |-
       return id(${id}_intervall).is_running();
 

@@ -68,7 +68,7 @@ external_components:
   - source:
       type: git
       url: https://github.com/lubeda/EspHoMaTriXv2
-      ref: "2025.10.3"
+      ref: "2025.12.0"
     refresh: 600s
     components: [ ehmtxv2 ]
 
@@ -81,6 +81,7 @@ esp32:
   board: "$board"
   cpu_frequency: $cpu_frequency
   framework:
+    type: arduino
     advanced:
       ignore_efuse_custom_mac: true
 

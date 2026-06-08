@@ -7,3 +7,10 @@ substitutions:
 packages:
   plug: !include
     file: common/gosund-sp111.yaml
+
+  kill: !include
+    file: common/switch-kill-sensor.yaml
+    vars:
+      kill_sensor_entity: binary_sensor.sjcgq11lm_10_water_leak
+
+# binary_sensor.sjcgq11lm_10_water_leak

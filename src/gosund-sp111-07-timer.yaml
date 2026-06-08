@@ -1,0 +1,18 @@
+substitutions:
+  name: gosund-sp111-07
+  id: gosund_sp111_07
+  comment: "osmoses timer"
+
+packages:
+  plug: !include
+    file: common/gosund-sp111.yaml
+    vars:
+      restore_mode: RESTORE_DEFAULT_OFF
+  timer: !include
+    file: common/timer-cancelable.yaml
+    vars:
+      water_leak_entity: binary_sensor.sjcgq11lm_09_water_leak
+      # Optionale Overrides (Package-Defaults werden verwendet wenn nicht gesetzt):
+      # timer_min:     "300"    #  5 Min
+      # timer_max:     "2400"   # 40 Min
+      # timer_initial: "900"    # 15 Min
