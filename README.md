@@ -1,6 +1,6 @@
 # ESPHome Config
 
-Central place for [esphome.io](https://esphome.io/index.html) config elements. A small, reusable
+Central place for [ESPHome](https://esphome.io/index.html) config elements. A small, reusable
 YAML structure to create a self-hosted DIY IoT device platform. It allows, for example, the same
 named sensors across different device types, with a focus on a "Don't repeat yourself" coding style.
 

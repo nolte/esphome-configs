@@ -85,7 +85,7 @@ All credentials are loaded from environment variables at compile time—no secre
 stored in the repository.
 
 `use_address: ${name}.fritz.box` overrides the connection target for ESPHome CLI and OTA.
-This requires the Fritz!Box to resolve devices by hostname, which works automatically with
+This requires the router to resolve devices by hostname, which works automatically with
 DHCP leases. The `.fritz.box` suffix itself also comes from `WIFI_DOMAIN`.
 
 ### Fallback AP
