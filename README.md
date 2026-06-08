@@ -1,13 +1,25 @@
-# ESPHome Config
+# esphome-configs
+
+[![Static CI Tests](https://github.com/nolte/esphome-configs/actions/workflows/build-static-tests.yaml/badge.svg)](https://github.com/nolte/esphome-configs/actions/workflows/build-static-tests.yaml)
 
 A DRY, self-hosted collection of [ESPHome](https://esphome.io/) device configurations. Concrete
-devices are tiny YAML files that compose reusable building blocks, so the same behaviour (Wi-Fi,
-diagnostics, relays, timers, sensors) is defined once and shared across many devices.
+devices are tiny YAML files that compose reusable building blocks, so behaviour like Wi-Fi,
+diagnostics, relays, timers, and sensors is defined once and shared across many devices.
 
-## How it works
+## Purpose
 
-Every file under `src/*.yaml` is one **device**. A device file stays small: it sets a few
-substitutions and pulls in **packages** from `src/common/` through ESPHome's
+- Manage many ESPHome devices without copying full configs: each device composes shared packages.
+- Built for DIY smart-home makers running a self-hosted [Home Assistant](https://www.home-assistant.io/)
+  setup, comfortable with YAML and flashing firmware.
+- Covers smart plugs (Gosund SP111, NOUS A1T), ESP32 cameras, displays and voice (ESP32-S3-BOX-3,
+  Ulanzi TC001), and sensors (SHT3x-D, SoMoSe, multi-point liquid level).
+- Keeps Wi-Fi and MQTT credentials out of the repository: they're read from environment variables
+  at compile time.
+
+## Usage
+
+Every file under `src/*.yaml` is one device. A device file stays small: it sets a few
+substitutions and pulls in packages from `src/common/` through ESPHome's
 [`packages:`](https://esphome.io/components/packages.html) include mechanism.
 
 ```yaml
@@ -27,66 +39,33 @@ packages:
 ```
 
 `common/gosund-sp111.yaml` in turn includes `common/base.yaml` (Wi-Fi, API, OTA, diagnostic
-sensors). The result: add a new plug by writing ~10 lines instead of copying a full config.
-Wi-Fi and MQTT credentials are never stored in the repo; they're read from environment variables
-at compile time (for example `!env_var WIFI_SSID`).
+sensors), so a new plug is ~10 lines instead of a full config.
 
-## Repository structure
-
-| Path                  | Contents                                                                       |
-| --------------------- | ------------------------------------------------------------------------------ |
-| `src/*.yaml`          | Device files, one per physical device, composed from packages                  |
-| `src/common/*.yaml`   | Reusable packages: hardware profiles, behaviours, time, sensors                |
-| `src/common/sensor/`, `binary_sensor/`, `text_sensor/` | Snippet-level sensor includes                 |
-| `src/include/`        | C++ headers used by lambdas (for example `somose.h`)                           |
-| `src/my_components/`  | Custom ESPHome external components (for example `somose`)                      |
-| `src/poc/`            | Proof-of-concept configs, not production devices                               |
-| `src/archive/`        | Retired configs kept for reference                                             |
-| `docs/`               | MkDocs documentation source                                                    |
-| `.taskfiles/`         | `go-task` definitions for compile and flash                                    |
-
-## Supported hardware
-
-- **Smart plugs**: Gosund SP111, NOUS A1T (relay plus HLW8012 energy metering)
-- **Cameras**: ESP32-CAM modules
-- **Displays and voice**: ESP32-S3-BOX-3 (voice assistant, pixel-art display), Ulanzi TC001
-- **Sensors**: SHT3x-D (temperature and humidity), SoMoSe (soil moisture), multi-point liquid level
-
-Reusable behaviour packages include `active-duration` (daily on/off schedule), `switch-intervall`
-(repeating pump cycles), `timer-cancelable` (countdown), and `switch-kill-sensor` (cut power on a
-Home Assistant binary sensor).
-
-## Prerequisites
+### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/): ESPHome runs through `ghcr.io/esphome/esphome`,
-  so no local Python install is needed
-- [go-task](https://taskfile.dev/): the task runner (`task -l` lists everything)
+  so no local Python install is needed.
+- [go-task](https://taskfile.dev/): the task runner (`task -l` lists everything).
 - [`pass`](https://www.passwordstore.org/): supplies Wi-Fi secrets to the build
-  (`network/wifi/ssid`, `network/wifi/password`)
-- An ESP device on `/dev/ttyUSB0` for the first, serial flash; later updates go over the air
+  (`network/wifi/ssid`, `network/wifi/password`).
+- An ESP device on `/dev/ttyUSB0` for the first, serial flash; later updates go over the air.
 
-## Quickstart
+### Compile and flash
 
-List the available tasks:
-
-```sh
-task -l
-```
-
-**Initial flash over USB** (for example when converting a Tasmota device to ESPHome). Compiles the
-firmware to `/tmp/firmware.bin`:
+Initial flash over USB (for example when converting a device from other firmware to ESPHome),
+which compiles to `/tmp/firmware.bin`:
 
 ```sh
 task esphome:compile DEVICE_FILE=nous-a1t-09.yaml
 ```
 
-**Run and flash a device** over serial via `/dev/ttyUSB0`:
+Run and flash a device over serial via `/dev/ttyUSB0`:
 
 ```sh
 task esphome:run DEVICE_FILE=nous-a1t-08.yaml
 ```
 
-**Over-the-air update** of an already-provisioned device:
+### Over-the-air update
 
 ```sh
 task esphome:run DEVICE_FILE="nous-a1t-08.yaml --device=192.168.x.x"
@@ -117,7 +96,33 @@ Per-device and per-package documentation lives under `docs/` and is built with M
 task mkdocs:start   # live preview on http://localhost:8002
 ```
 
-## Related projects
+## Structure
 
+```text
+src/
+├── *.yaml          # device files, one per physical device
+├── common/         # reusable packages: hardware profiles, behaviours, time
+│   ├── *.yaml
+│   ├── sensor/     # snippet-level sensor includes
+│   ├── binary_sensor/
+│   └── text_sensor/
+├── include/        # C++ headers used by lambdas (for example somose.h)
+├── my_components/  # custom ESPHome external components (for example somose)
+├── poc/            # proof-of-concept configs, not production devices
+└── archive/        # retired configs kept for reference
+docs/               # MkDocs documentation source
+.taskfiles/         # go-task definitions for compile and flash
+```
+
+## Related repositories
+
+- [nolte/taskfiles](https://github.com/nolte/taskfiles): shared go-task definitions used by the Taskfile
+- [nolte/gh-plumbing](https://github.com/nolte/gh-plumbing): reusable GitHub Actions workflows (CI, spelling, automerge)
 - [BeFlE/SoMoSe](https://github.com/BeFlE/SoMoSe): soil moisture sensor used by the `somose` component
 - [lubeda/EspHoMaTriXv2](https://github.com/lubeda/EspHoMaTriXv2): pixel matrix support for the Ulanzi display
+
+## Status
+
+Personal, actively maintained collection. Device configs are added and revised as the hardware
+setup changes; entries under `src/poc/` and `src/archive/` are experimental or retired and not
+kept production-ready.
