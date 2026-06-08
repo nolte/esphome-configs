@@ -7,7 +7,7 @@ substitutions:
 packages:
   plug: !include
     file: common/gosund-sp111.yaml
-  
+
   kill: !include
     file: common/switch-kill-sensor.yaml
     vars:
