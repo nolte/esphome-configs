@@ -1,0 +1,1075 @@
+# ============================================================
+#  esp32-s3-box-3.yaml  –  Common Package
+#
+#  Änderungen gegenüber Original:
+#  [FIX]  .state == → .current_option() == (Select deprecated API)
+#  [NEW]  Pixel Art Integration (Phase 30, pixel_art_page)
+#  [NEW]  pixel_art.yaml Package
+# ============================================================
+
+substitutions:
+  name: ${name}
+  friendly_name: ${name}
+
+  # Casita Illustrationen
+  loading_illustration_file:  https://github.com/esphome/wake-word-voice-assistants/raw/main/casita/loading_320_240.png
+  idle_illustration_file:     https://github.com/esphome/wake-word-voice-assistants/raw/main/casita/idle_320_240.png
+  listening_illustration_file: https://github.com/esphome/wake-word-voice-assistants/raw/main/casita/listening_320_240.png
+  thinking_illustration_file:  https://github.com/esphome/wake-word-voice-assistants/raw/main/casita/thinking_320_240.png
+  replying_illustration_file:  https://github.com/esphome/wake-word-voice-assistants/raw/main/casita/replying_320_240.png
+  error_illustration_file:     https://github.com/esphome/wake-word-voice-assistants/raw/main/casita/error_320_240.png
+  timer_finished_illustration_file: https://github.com/esphome/wake-word-voice-assistants/raw/main/casita/timer_finished_320_240.png
+
+  # Hintergrundfarben je Phase
+  loading_illustration_background_color: "000000"
+  idle_illustration_background_color:    "000000"
+  listening_illustration_background_color: "FFFFFF"
+  thinking_illustration_background_color:  "FFFFFF"
+  replying_illustration_background_color:  "FFFFFF"
+  error_illustration_background_color:     "000000"
+
+  # Voice Assistant Phasen IDs
+  voice_assist_idle_phase_id:           "1"
+  voice_assist_listening_phase_id:      "2"
+  voice_assist_thinking_phase_id:       "3"
+  voice_assist_replying_phase_id:       "4"
+  voice_assist_not_ready_phase_id:      "10"
+  voice_assist_error_phase_id:          "11"
+  voice_assist_muted_phase_id:          "12"
+  voice_assist_timer_finished_phase_id: "20"
+  voice_assist_pixel_art_phase_id:      "30"   # [NEW] Pixel Art Modus
+
+  # Font-Konfiguration
+  font_glyphsets: "GF_Latin_Core"
+  font_family: Figtree
+
+  # Erlaubte Sonderzeichen für Fonts
+  allowed_characters: " !#%'()+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWYZ[]_abcdefghijklmnopqrstuvwxyz{|}°²³µ¿ÁÂÄÅÉÖÚßàáâãäåæçèéêëìíîðñòóôõöøùúûüýþāăąćčďĐđēėęěğĮįıļľŁłńňőřśšťũūůűųźŻżŽžơưșțΆΈΌΐΑΒΓΔΕΖΗΘΚΜΝΠΡΣΤΥΦάέήίαβγδεζηθικλμνξοπρςστυφχψωϊόύώАБВГДЕЖЗИКЛМНОПРСТУХЦЧШЪЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяёђєіїјљњћאבגדהוזחטיכלםמןנסעפץצקרשת،ءآأإئابةتجحخدذرزسشصضطظعغفقكلمنهوىيٹپچڈکگںھہیے"
+
+# ============================================================
+#  PACKAGES
+# ============================================================
+packages:
+  base: !include
+    file: ./base.yaml
+    vars:
+      project_name: "diy.esp32-s3-box-3"
+      project_version: "esp32-s3-box-3"
+  time:       !include ./time.yaml
+  pixel_art:  !include ./pixel_art.yaml   # [NEW]
+
+# ============================================================
+#  ESP32 / HARDWARE
+# ============================================================
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  min_version: 2025.5.0
+  name_add_mac_suffix: false
+  on_boot:
+    priority: 600
+    then:
+      - script.execute: draw_display
+      - delay: 30s
+      - if:
+          condition:
+            lambda: return id(init_in_progress);
+          then:
+            - lambda: id(init_in_progress) = false;
+            - script.execute: draw_display
+
+esp32:
+  board: esp32s3box
+  flash_size: 16MB
+  cpu_frequency: 240MHz
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240:    "y"
+      CONFIG_ESP32S3_DATA_CACHE_64KB:        "y"
+      CONFIG_ESP32S3_DATA_CACHE_LINE_64B:    "y"
+
+psram:
+  mode: octal
+  speed: 80MHz
+
+# ============================================================
+#  CONNECTIVITY
+# ============================================================
+api:
+  custom_services: true
+  on_client_connected:
+    - script.execute: draw_display
+  on_client_disconnected:
+    - script.execute: draw_display
+  # HINWEIS: api.actions sind in den Device-YAMLs definiert
+  # (esp32-s3-box-3-01.yaml / esp32-s3-box-3-02.yaml),
+  # da ESPHome api: aus tief verschachtelten Packages
+  # nicht zuverlässig mit base.yaml merged.
+
+  actions:
+    # ── Pixel Art anzeigen ───────────────────────────────────
+    # HA Service: esphome.esp32_s3_box_3_01_set_pixel_art
+    # Parameter:
+    #   pixel_data (string) : 256 Hex-Zeichen (0–F)
+    #   label      (string) : Beschriftung unter dem Icon
+    - action: set_pixel_art
+      variables:
+        pixel_data: string
+        label: string
+      then:
+        - lambda: |-
+            id(pixel_art_hex) = pixel_data;
+            id(pixel_art_lbl) = label;
+        - lambda: id(voice_assistant_phase) = ${voice_assist_pixel_art_phase_id};
+        - script.execute: draw_display
+
+    # ── Pixel Art beenden ────────────────────────────────────
+    # HA Service: esphome.esp32_s3_box_3_01_clear_pixel_art
+    - action: clear_pixel_art
+      then:
+        - lambda: |-
+            id(pixel_art_hex) = "";
+            id(pixel_art_lbl) = "";
+        - switch.turn_off: pixel_art_mode
+
+
+ota:
+  - platform: esphome
+    id: ota_esphome
+
+logger:
+  hardware_uart: USB_SERIAL_JTAG
+
+# wifi:
+#   domain: !env_var WIFI_DOMAIN
+#   ssid: !env_var WIFI_SSID
+#   password: !env_var WIFI_PASSWORD
+#   ap:
+#     ssid: "${friendly_name} Fallback"
+#     password: !env_var WIFI_FALLBACK_PASSWORD
+#   on_connect:
+#     - script.execute: draw_display
+#   on_disconnect:
+#     - script.execute: draw_display
+
+# captive_portal:
+
+# ============================================================
+#  BUTTONS
+# ============================================================
+button:
+  - platform: factory_reset
+    id: factory_reset_btn
+    internal: true
+
+# ============================================================
+#  BINARY SENSORS
+# ============================================================
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO0
+      mode: INPUT_PULLUP
+      inverted: true
+    id: left_top_button
+    internal: true
+    on_multi_click:
+      # Kurzer Druck → Timer stoppen
+      - timing:
+          - ON for at least 50ms
+          - OFF for at least 50ms
+        then:
+          - switch.turn_off: timer_ringing
+      # Langer Druck (10s) → Factory Reset
+      - timing:
+          - ON for at least 10s
+        then:
+          - button.press: factory_reset_btn
+
+  # GT911 Home-Button (roter Kreis unter Display)
+  - platform: gt911
+    name: "Home"
+    id: home_button
+    index: 0
+    on_press:
+      then:
+        # Pixel Art Modus beenden wenn aktiv
+        - if:
+            condition:
+              lambda: return id(voice_assistant_phase) == ${voice_assist_pixel_art_phase_id};
+            then:
+              - switch.turn_off: pixel_art_mode
+
+# ============================================================
+#  DISPLAY BACKLIGHT
+# ============================================================
+output:
+  - platform: ledc
+    pin: GPIO47
+    id: backlight_output
+
+light:
+  - platform: monochromatic
+    id: led
+    name: Screen
+    icon: "mdi:television"
+    entity_category: config
+    output: backlight_output
+    restore_mode: RESTORE_DEFAULT_ON
+    default_transition_length: 250ms
+
+# ============================================================
+#  I2C (Touchscreen GT911)
+# ============================================================
+i2c:
+  scl: GPIO18
+  sda: GPIO8
+
+touchscreen:
+  platform: gt911
+  id: gt911_touchscreen
+  interrupt_pin: GPIO3
+
+# ============================================================
+#  I2S AUDIO
+# ============================================================
+i2s_audio:
+  - id: i2s_audio_bus
+    i2s_lrclk_pin: GPIO45
+    i2s_bclk_pin:  GPIO17
+    i2s_mclk_pin:  GPIO2
+
+audio_adc:
+  - platform: es7210
+    id: es7210_adc
+    bits_per_sample: 16bit
+    sample_rate: 16000
+
+audio_dac:
+  - platform: es8311
+    id: es8311_dac
+    bits_per_sample: 16bit
+    sample_rate: 48000
+
+microphone:
+  - platform: i2s_audio
+    id: box_mic
+    sample_rate: 16000
+    i2s_din_pin: GPIO16
+    bits_per_sample: 16bit
+    adc_type: external
+
+speaker:
+  - platform: i2s_audio
+    id: box_speaker
+    i2s_dout_pin: GPIO15
+    dac_type: external
+    sample_rate: 48000
+    bits_per_sample: 16bit
+    channel: left                   # S3 Box hat nur einen Ausgabe-Kanal
+    audio_dac: es8311_dac
+    buffer_duration: 100ms
+
+# ============================================================
+#  MEDIA PLAYER
+# ============================================================
+media_player:
+  - platform: speaker
+    name: None
+    id: speaker_media_player
+    volume_min: 0.5
+    volume_max: 0.8
+    announcement_pipeline:
+      speaker: box_speaker
+      format: FLAC
+      sample_rate: 48000
+      num_channels: 1
+    files:
+      - id: timer_finished_sound
+        file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/timer_finished.flac
+    on_announcement:
+      # Wake Word stoppen wenn Mikrofon aufnimmt
+      - if:
+          condition:
+            - microphone.is_capturing:
+          then:
+            - script.execute: stop_wake_word
+            # Sicherstellen dass VA stoppt bevor weitergemacht wird
+            - if:
+                condition:
+                  - lambda: return id(wake_word_engine_location).current_option() == "In Home Assistant";
+                then:
+                  - wait_until:
+                      - not:
+                          voice_assistant.is_running:
+      # Nicht im VA-Modus → Mute-Display zeigen
+      - if:
+          condition:
+            not:
+              voice_assistant.is_running:
+          then:
+            - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
+            - script.execute: draw_display
+    on_idle:
+      # Nutzer-Mediawiedergabe beendet → Wake Word neu starten
+      - if:
+          condition:
+            not:
+              voice_assistant.is_running:
+          then:
+            - script.execute: start_wake_word
+            - script.execute: set_idle_or_mute_phase
+            - script.execute: draw_display
+
+# ============================================================
+#  MICRO WAKE WORD
+# ============================================================
+micro_wake_word:
+  id: mww
+  models:
+    - okay_nabu
+    - hey_mycroft
+    - hey_jarvis
+  on_wake_word_detected:
+    - voice_assistant.start:
+        wake_word: !lambda return wake_word;
+
+# ============================================================
+#  VOICE ASSISTANT
+# ============================================================
+voice_assistant:
+  id: va
+  microphone: box_mic
+  media_player: speaker_media_player
+  micro_wake_word: mww
+  noise_suppression_level: 2
+  auto_gain: 31dBFS
+  volume_multiplier: 2.0
+
+  on_listening:
+    - lambda: id(voice_assistant_phase) = ${voice_assist_listening_phase_id};
+    - text_sensor.template.publish:
+        id: text_request
+        state: "..."
+    - text_sensor.template.publish:
+        id: text_response
+        state: "..."
+    - script.execute: draw_display
+
+  on_stt_vad_end:
+    - lambda: id(voice_assistant_phase) = ${voice_assist_thinking_phase_id};
+    - script.execute: draw_display
+
+  on_stt_end:
+    - text_sensor.template.publish:
+        id: text_request
+        state: !lambda return x;
+    - script.execute: draw_display
+
+  on_tts_start:
+    - text_sensor.template.publish:
+        id: text_response
+        state: !lambda return x;
+    - lambda: id(voice_assistant_phase) = ${voice_assist_replying_phase_id};
+    - script.execute: draw_display
+
+  on_end:
+    # Kurz warten ob eine Announcement startet
+    - wait_until:
+        condition:
+          - media_player.is_announcing:
+        timeout: 0.5s
+    # Warten bis I2S-Bus wieder frei
+    - wait_until:
+        - and:
+            - not:
+                media_player.is_announcing:
+            - not:
+                speaker.is_playing:
+    # mWW neu starten wenn On-Device Modus aktiv
+    - if:
+        condition:
+          # [FIX] .current_option() statt deprecated .state
+          - lambda: return id(wake_word_engine_location).current_option() == "On device";
+        then:
+          - lambda: id(va).set_use_wake_word(false);
+          - micro_wake_word.start:
+    - script.execute: set_idle_or_mute_phase
+    - script.execute: draw_display
+    # Text Sensoren leeren
+    - text_sensor.template.publish:
+        id: text_request
+        state: ""
+    - text_sensor.template.publish:
+        id: text_response
+        state: ""
+
+  on_error:
+    - if:
+        condition:
+          lambda: return !id(init_in_progress);
+        then:
+          - lambda: id(voice_assistant_phase) = ${voice_assist_error_phase_id};
+          - script.execute: draw_display
+          - delay: 1s
+          - if:
+              condition:
+                switch.is_off: mute
+              then:
+                - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
+              else:
+                - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
+          - script.execute: draw_display
+
+  on_client_connected:
+    - lambda: id(init_in_progress) = false;
+    - script.execute: start_wake_word
+    - script.execute: set_idle_or_mute_phase
+    - script.execute: draw_display
+
+  on_client_disconnected:
+    - script.execute: stop_wake_word
+    - lambda: id(voice_assistant_phase) = ${voice_assist_not_ready_phase_id};
+    - script.execute: draw_display
+
+  on_timer_started:
+    - script.execute: draw_display
+  on_timer_cancelled:
+    - script.execute: draw_display
+  on_timer_updated:
+    - script.execute: draw_display
+  on_timer_tick:
+    - script.execute: draw_display
+
+  on_timer_finished:
+    - switch.turn_on: timer_ringing
+    - wait_until:
+        media_player.is_announcing:
+    - lambda: id(voice_assistant_phase) = ${voice_assist_timer_finished_phase_id};
+    - script.execute: draw_display
+
+# ============================================================
+#  SELECT – Wake Word Engine Standort
+# ============================================================
+select:
+  - platform: template
+    entity_category: config
+    name: Wake word engine location
+    id: wake_word_engine_location
+    icon: "mdi:account-voice"
+    optimistic: true
+    restore_value: true
+    options:
+      - In Home Assistant
+      - On device
+    initial_option: On device
+    on_value:
+      - if:
+          condition:
+            lambda: return !id(init_in_progress);
+          then:
+            - wait_until:
+                lambda: |
+                  return id(voice_assistant_phase) == ${voice_assist_muted_phase_id}
+                      || id(voice_assistant_phase) == ${voice_assist_idle_phase_id};
+            # [FIX] .current_option() statt deprecated .state
+            - if:
+                condition:
+                  lambda: return x == "In Home Assistant";
+                then:
+                  - micro_wake_word.stop
+                  - delay: 500ms
+                  - if:
+                      condition:
+                        switch.is_off: mute
+                      then:
+                        - lambda: id(va).set_use_wake_word(true);
+                        - voice_assistant.start_continuous:
+            - if:
+                condition:
+                  lambda: return x == "On device";
+                then:
+                  - lambda: id(va).set_use_wake_word(false);
+                  - voice_assistant.stop
+                  - delay: 500ms
+                  - if:
+                      condition:
+                        switch.is_off: mute
+                      then:
+                        - micro_wake_word.start
+
+# ============================================================
+#  GLOBALS
+# ============================================================
+globals:
+  - id: init_in_progress
+    type: bool
+    restore_value: false
+    initial_value: "true"
+
+  - id: voice_assistant_phase
+    type: int
+    restore_value: false
+    initial_value: ${voice_assist_not_ready_phase_id}
+
+  - id: global_first_active_timer
+    type: voice_assistant::Timer
+    restore_value: false
+
+  - id: global_is_timer_active
+    type: bool
+    restore_value: false
+
+  - id: global_first_timer
+    type: voice_assistant::Timer
+    restore_value: false
+
+  - id: global_is_timer
+    type: bool
+    restore_value: false
+
+# ============================================================
+#  SWITCHES
+# ============================================================
+switch:
+  - platform: gpio
+    name: Speaker Enable
+    pin: GPIO46
+    restore_mode: RESTORE_DEFAULT_ON
+    entity_category: config
+    disabled_by_default: true
+
+  - platform: template
+    name: Mute
+    id: mute
+    icon: "mdi:microphone-off"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+    on_turn_off:
+      - microphone.unmute:
+      - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
+      - script.execute: draw_display
+    on_turn_on:
+      - microphone.mute:
+      - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
+      - script.execute: draw_display
+
+  - platform: template
+    id: timer_ringing
+    optimistic: true
+    internal: true
+    restore_mode: ALWAYS_OFF
+    on_turn_off:
+      - lambda: |-
+          id(speaker_media_player)
+            ->make_call()
+            .set_command(media_player::MediaPlayerCommand::MEDIA_PLAYER_COMMAND_REPEAT_OFF)
+            .set_announcement(true)
+            .perform();
+          id(speaker_media_player)->set_playlist_delay_ms(speaker::AudioPipelineType::ANNOUNCEMENT, 0);
+      - media_player.stop:
+          announcement: true
+    on_turn_on:
+      - lambda: |-
+          id(speaker_media_player)
+            ->make_call()
+            .set_command(media_player::MediaPlayerCommand::MEDIA_PLAYER_COMMAND_REPEAT_ONE)
+            .set_announcement(true)
+            .perform();
+          id(speaker_media_player)->set_playlist_delay_ms(speaker::AudioPipelineType::ANNOUNCEMENT, 1000);
+      - media_player.speaker.play_on_device_media_file:
+          media_file: timer_finished_sound
+          announcement: true
+      - delay: 15min
+      - switch.turn_off: timer_ringing
+
+# ============================================================
+#  TEXT SENSORS
+# ============================================================
+text_sensor:
+  - id: text_request
+    platform: template
+    on_value:
+      lambda: |-
+        if (id(text_request).state.length() > 32) {
+          std::string name = id(text_request).state.c_str();
+          std::string truncated = esphome::str_truncate(name.c_str(), 31);
+          id(text_request).state = (truncated + "...").c_str();
+        }
+
+  - id: text_response
+    platform: template
+    on_value:
+      lambda: |-
+        if (id(text_response).state.length() > 32) {
+          std::string name = id(text_response).state.c_str();
+          std::string truncated = esphome::str_truncate(name.c_str(), 31);
+          id(text_response).state = (truncated + "...").c_str();
+        }
+
+# ============================================================
+#  FARBEN (Display-Hintergründe)
+# ============================================================
+color:
+  - id: idle_color
+    hex: ${idle_illustration_background_color}
+  - id: listening_color
+    hex: ${listening_illustration_background_color}
+  - id: thinking_color
+    hex: ${thinking_illustration_background_color}
+  - id: replying_color
+    hex: ${replying_illustration_background_color}
+  - id: loading_color
+    hex: ${loading_illustration_background_color}
+  - id: error_color
+    hex: ${error_illustration_background_color}
+  - id: active_timer_color
+    hex: "26ed3a"
+  - id: paused_timer_color
+    hex: "3b89e3"
+
+# ============================================================
+#  BILDER (Casita Illustrationen)
+# ============================================================
+image:
+  - file: ${error_illustration_file}
+    id: casita_error
+    resize: 320x240
+    type: RGB
+    transparency: alpha_channel
+  - file: ${idle_illustration_file}
+    id: casita_idle
+    resize: 320x240
+    type: RGB
+    transparency: alpha_channel
+  - file: ${listening_illustration_file}
+    id: casita_listening
+    resize: 320x240
+    type: RGB
+    transparency: alpha_channel
+  - file: ${thinking_illustration_file}
+    id: casita_thinking
+    resize: 320x240
+    type: RGB
+    transparency: alpha_channel
+  - file: ${replying_illustration_file}
+    id: casita_replying
+    resize: 320x240
+    type: RGB
+    transparency: alpha_channel
+  - file: ${timer_finished_illustration_file}
+    id: casita_timer_finished
+    resize: 320x240
+    type: RGB
+    transparency: alpha_channel
+  - file: ${loading_illustration_file}
+    id: casita_initializing
+    resize: 320x240
+    type: RGB
+    transparency: alpha_channel
+  - file: https://github.com/esphome/wake-word-voice-assistants/raw/main/error_box_illustrations/error-no-wifi.png
+    id: error_no_wifi
+    resize: 320x240
+    type: RGB
+    transparency: alpha_channel
+  - file: https://github.com/esphome/wake-word-voice-assistants/raw/main/error_box_illustrations/error-no-ha.png
+    id: error_no_ha
+    resize: 320x240
+    type: RGB
+    transparency: alpha_channel
+
+# ============================================================
+#  FONTS
+# ============================================================
+font:
+  - file:
+      type: gfonts
+      family: ${font_family}
+      weight: 300
+      italic: true
+    id: font_request
+    size: 15
+    glyphsets:
+      - ${font_glyphsets}
+  - file:
+      type: gfonts
+      family: ${font_family}
+      weight: 300
+    id: font_response
+    size: 15
+    glyphsets:
+      - ${font_glyphsets}
+  - file:
+      type: gfonts
+      family: ${font_family}
+      weight: 300
+    id: font_timer
+    size: 30
+    glyphsets:
+      - ${font_glyphsets}
+
+# ============================================================
+#  SPI (Display-Bus)
+# ============================================================
+spi:
+  - id: spi_bus
+    clk_pin: 7
+    mosi_pin: 6
+
+# ============================================================
+#  DISPLAY (ILI9xxx – S3BOX 320×240)
+# ============================================================
+display:
+  - platform: ili9xxx
+    id: s3_box_lcd
+    model: S3BOX
+    invert_colors: false
+    data_rate: 40MHz
+    cs_pin: 5
+    dc_pin: 4
+    reset_pin:
+      number: 48
+      inverted: true
+    update_interval: never
+    pages:
+
+      # ── Voice Assistant Seiten ──────────────────────────
+      - id: idle_page
+        lambda: |-
+          it.fill(id(idle_color));
+          it.image((it.get_width() / 2), (it.get_height() / 2), id(casita_idle), ImageAlign::CENTER);
+          id(draw_timer_timeline).execute();
+          id(draw_active_timer_widget).execute();
+
+      - id: listening_page
+        lambda: |-
+          it.fill(id(listening_color));
+          it.image((it.get_width() / 2), (it.get_height() / 2), id(casita_listening), ImageAlign::CENTER);
+          id(draw_timer_timeline).execute();
+
+      - id: thinking_page
+        lambda: |-
+          it.fill(id(thinking_color));
+          it.image((it.get_width() / 2), (it.get_height() / 2), id(casita_thinking), ImageAlign::CENTER);
+          id(draw_timer_timeline).execute();
+
+      - id: replying_page
+        lambda: |-
+          it.fill(id(replying_color));
+          it.image((it.get_width() / 2), (it.get_height() / 2), id(casita_replying), ImageAlign::CENTER);
+          it.filled_rectangle(20, 20, 280, 30, Color::WHITE);
+          it.rectangle(20, 20, 280, 30, Color::BLACK);
+          it.filled_rectangle(20, 190, 280, 30, Color::WHITE);
+          it.rectangle(20, 190, 280, 30, Color::BLACK);
+          it.printf(30, 25,  id(font_request),  Color::BLACK, "%s", id(text_request).state.c_str());
+          it.printf(30, 195, id(font_response), Color::BLACK, "%s", id(text_response).state.c_str());
+          id(draw_timer_timeline).execute();
+
+      - id: timer_finished_page
+        lambda: |-
+          it.fill(id(idle_color));
+          it.image((it.get_width() / 2), (it.get_height() / 2), id(casita_timer_finished), ImageAlign::CENTER);
+
+      - id: error_page
+        lambda: |-
+          it.fill(id(error_color));
+          it.image((it.get_width() / 2), (it.get_height() / 2), id(casita_error), ImageAlign::CENTER);
+
+      - id: no_ha_page
+        lambda: |-
+          it.image((it.get_width() / 2), (it.get_height() / 2), id(error_no_ha), ImageAlign::CENTER);
+
+      - id: no_wifi_page
+        lambda: |-
+          it.image((it.get_width() / 2), (it.get_height() / 2), id(error_no_wifi), ImageAlign::CENTER);
+
+      - id: initializing_page
+        lambda: |-
+          it.fill(id(loading_color));
+          it.image((it.get_width() / 2), (it.get_height() / 2), id(casita_initializing), ImageAlign::CENTER);
+
+      - id: muted_page
+        lambda: |-
+          it.fill(Color::BLACK);
+          id(draw_timer_timeline).execute();
+          id(draw_active_timer_widget).execute();
+
+      # ── [NEW] Pixel Art Seite ────────────────────────────
+      - id: pixel_art_page
+        lambda: |-
+          it.fill(Color::BLACK);
+
+          // Daten aus Global-Variable (gesetzt via api.action set_pixel_art)
+          std::string data = id(pixel_art_hex);
+
+          if (data.length() == 256) {
+            // Icon zentriert auf 320×240 Display
+            // 128×128 Pixel (16×16 Grid, je 8×8 Block)
+            const int block = 8;
+            const int icon  = 16 * block;                        // = 128
+            int start_x = (it.get_width()  - icon) / 2;         // = 96
+            int start_y = (it.get_height() - icon) / 2 - 10;    // = 46
+
+            for (int py = 0; py < 16; py++) {
+              for (int px = 0; px < 16; px++) {
+                char c = toupper((unsigned char)data[py * 16 + px]);
+                Color col;
+                switch (c) {
+                  case '0': col = id(pa_0_black);     break;
+                  case '1': col = id(pa_1_white);     break;
+                  case '2': col = id(pa_2_red);       break;
+                  case '3': col = id(pa_3_lime);      break;
+                  case '4': col = id(pa_4_blue);      break;
+                  case '5': col = id(pa_5_yellow);    break;
+                  case '6': col = id(pa_6_cyan);      break;
+                  case '7': col = id(pa_7_magenta);   break;
+                  case '8': col = id(pa_8_orange);    break;
+                  case '9': col = id(pa_9_purple);    break;
+                  case 'A': col = id(pa_a_darkgreen); break;
+                  case 'B': col = id(pa_b_brown);     break;
+                  case 'C': col = id(pa_c_pink);      break;
+                  case 'D': col = id(pa_d_lightblue); break;
+                  case 'E': col = id(pa_e_darkred);   break;
+                  default:  col = id(pa_f_gray);      break;
+                }
+                it.filled_rectangle(
+                  start_x + px * block,
+                  start_y + py * block,
+                  block, block, col
+                );
+              }
+            }
+          } else {
+            // Kein gültiges Bild → Hinweis
+            it.printf(
+              it.get_width() / 2, it.get_height() / 2,
+              id(font_response), Color::WHITE, TextAlign::CENTER,
+              "Kein Pixel Art"
+            );
+          }
+
+          // Label unterhalb des Icons (aus Global-Variable)
+          if (id(pixel_art_lbl).length() > 0) {
+            it.printf(
+              it.get_width() / 2,
+              it.get_height() - 20,
+              id(font_response), Color::WHITE, TextAlign::CENTER,
+              "%s", id(pixel_art_lbl).c_str()
+            );
+          }
+
+# ============================================================
+#  SCRIPTS
+# ============================================================
+script:
+
+  # ── Haupt-Draw-Script ────────────────────────────────────
+  - id: draw_display
+    then:
+      - if:
+          condition:
+            lambda: return !id(init_in_progress);
+          then:
+            # [NEW] Pixel Art Modus hat Vorrang vor allem anderen
+            - if:
+                condition:
+                  lambda: return id(voice_assistant_phase) == ${voice_assist_pixel_art_phase_id};
+                then:
+                  - display.page.show: pixel_art_page
+                  - component.update: s3_box_lcd
+                else:
+                  # Normale VA/Display Logik
+                  - if:
+                      condition:
+                        wifi.connected:
+                      then:
+                        - if:
+                            condition:
+                              api.connected:
+                            then:
+                              - lambda: |
+                                  switch (id(voice_assistant_phase)) {
+                                    case ${voice_assist_listening_phase_id}:
+                                      id(s3_box_lcd).show_page(listening_page);
+                                      id(s3_box_lcd).update();
+                                      break;
+                                    case ${voice_assist_thinking_phase_id}:
+                                      id(s3_box_lcd).show_page(thinking_page);
+                                      id(s3_box_lcd).update();
+                                      break;
+                                    case ${voice_assist_replying_phase_id}:
+                                      id(s3_box_lcd).show_page(replying_page);
+                                      id(s3_box_lcd).update();
+                                      break;
+                                    case ${voice_assist_error_phase_id}:
+                                      id(s3_box_lcd).show_page(error_page);
+                                      id(s3_box_lcd).update();
+                                      break;
+                                    case ${voice_assist_muted_phase_id}:
+                                      id(s3_box_lcd).show_page(muted_page);
+                                      id(s3_box_lcd).update();
+                                      break;
+                                    case ${voice_assist_not_ready_phase_id}:
+                                      id(s3_box_lcd).show_page(no_ha_page);
+                                      id(s3_box_lcd).update();
+                                      break;
+                                    case ${voice_assist_timer_finished_phase_id}:
+                                      id(s3_box_lcd).show_page(timer_finished_page);
+                                      id(s3_box_lcd).update();
+                                      break;
+                                    default:
+                                      id(s3_box_lcd).show_page(idle_page);
+                                      id(s3_box_lcd).update();
+                                  }
+                            else:
+                              - display.page.show: no_ha_page
+                              - component.update: s3_box_lcd
+                      else:
+                        - display.page.show: no_wifi_page
+                        - component.update: s3_box_lcd
+          else:
+            - display.page.show: initializing_page
+            - component.update: s3_box_lcd
+
+  # ── Wake Word starten ────────────────────────────────────
+  - id: start_wake_word
+    then:
+      # [FIX] .current_option() statt deprecated .state
+      - if:
+          condition:
+            and:
+              - not:
+                  - voice_assistant.is_running:
+              - lambda: return id(wake_word_engine_location).current_option() == "On device";
+          then:
+            - lambda: id(va).set_use_wake_word(false);
+            - micro_wake_word.start:
+      - if:
+          condition:
+            and:
+              - not:
+                  - voice_assistant.is_running:
+              - lambda: return id(wake_word_engine_location).current_option() == "In Home Assistant";
+          then:
+            - lambda: id(va).set_use_wake_word(true);
+            - voice_assistant.start_continuous:
+
+  # ── Wake Word stoppen ────────────────────────────────────
+  - id: stop_wake_word
+    then:
+      # [FIX] .current_option() statt deprecated .state
+      - if:
+          condition:
+            lambda: return id(wake_word_engine_location).current_option() == "In Home Assistant";
+          then:
+            - lambda: id(va).set_use_wake_word(false);
+            - voice_assistant.stop:
+      - if:
+          condition:
+            lambda: return id(wake_word_engine_location).current_option() == "On device";
+          then:
+            - micro_wake_word.stop:
+
+  # ── Idle/Mute Phase setzen ───────────────────────────────
+  - id: set_idle_or_mute_phase
+    then:
+      - if:
+          condition:
+            switch.is_off: mute
+          then:
+            - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
+          else:
+            - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
+
+  # ── Timer: ersten aktiven Timer ermitteln ────────────────
+  - id: fetch_first_active_timer
+    then:
+      - lambda: |
+          const auto timers = id(va).get_timers();
+          auto output_timer = timers.begin()->second;
+          for (auto &iterable_timer : timers) {
+            if (iterable_timer.second.is_active
+                && iterable_timer.second.seconds_left <= output_timer.seconds_left) {
+              output_timer = iterable_timer.second;
+            }
+          }
+          id(global_first_active_timer) = output_timer;
+
+  # ── Timer: prüfen ob aktive Timer vorhanden ──────────────
+  - id: check_if_timers_active
+    then:
+      - lambda: |
+          const auto timers = id(va).get_timers();
+          bool output = false;
+          for (auto &iterable_timer : timers) {
+            if (iterable_timer.second.is_active) {
+              output = true;
+            }
+          }
+          id(global_is_timer_active) = output;
+
+  # ── Timer: ersten Timer (aktiv oder pausiert) ermitteln ──
+  - id: fetch_first_timer
+    then:
+      - lambda: |
+          const auto timers = id(va).get_timers();
+          auto output_timer = timers.begin()->second;
+          for (auto &iterable_timer : timers) {
+            if (iterable_timer.second.seconds_left <= output_timer.seconds_left) {
+              output_timer = iterable_timer.second;
+            }
+          }
+          id(global_first_timer) = output_timer;
+
+  # ── Timer: prüfen ob irgendwelche Timer vorhanden ────────
+  - id: check_if_timers
+    then:
+      - lambda: |
+          const auto timers = id(va).get_timers();
+          bool output = timers.size() > 0;
+          id(global_is_timer) = output;
+
+  # ── Timer-Timeline (horizontaler Fortschrittsbalken) ─────
+  - id: draw_timer_timeline
+    then:
+      - lambda: |
+          id(check_if_timers).execute();
+          if (!id(global_is_timer)) return;
+          id(fetch_first_timer).execute();
+          auto timer = id(global_first_timer);
+          int total = (int)timer.total_seconds;
+          int left  = (int)timer.seconds_left;
+          if (total <= 0) return;
+          int bar_width = id(s3_box_lcd).get_width();
+          int elapsed_width = (int)((float)(total - left) / total * bar_width);
+          Color bar_color = timer.is_active ? id(active_timer_color) : id(paused_timer_color);
+          id(s3_box_lcd).filled_rectangle(0, 0, elapsed_width, 6, bar_color);
+
+  # ── Timer-Widget (Anzeige verbleibende Zeit) ─────────────
+  - id: draw_active_timer_widget
+    then:
+      - lambda: |
+          id(check_if_timers_active).execute();
+          if (!id(global_is_timer_active)) return;
+          id(fetch_first_active_timer).execute();
+          auto timer = id(global_first_active_timer);
+          int seconds_left = (int)timer.seconds_left;
+          int hours_left   = seconds_left / 3600;
+          int minutes_left = (seconds_left % 3600) / 60;
+          int secs_left    = seconds_left % 60;
+
+          auto display_hours   = (hours_left   < 10 ? "0" : "") + std::to_string(hours_left);
+          auto display_minutes = (minutes_left  < 10 ? "0" : "") + std::to_string(minutes_left);
+          auto display_seconds = (secs_left     < 10 ? "0" : "") + std::to_string(secs_left);
+
+          std::string display_string = (hours_left > 0)
+            ? display_hours + ":" + display_minutes
+            : display_minutes + ":" + display_seconds;
+
+          id(s3_box_lcd).printf(
+            120, 47,
+            id(font_timer), Color::BLACK,
+            "%s", display_string.c_str()
+          );

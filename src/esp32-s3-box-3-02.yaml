@@ -6,4 +6,5 @@ substitutions:
 
 packages:
   plug: !include
-    file: common/esp32-s3-box-3.yaml
+    file: common/esp32-s3-box-3-draw.yaml
+

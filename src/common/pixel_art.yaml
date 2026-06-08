@@ -1,0 +1,81 @@
+# ============================================================
+#  pixel_art.yaml  –  Pixel Art Package für ESP32-S3-BOX-3
+#
+#  Protokoll: 256-stelliger Hex-String (16×16 Pixel)
+#  Jedes Zeichen = Farbindex 0–F → 4×4 Block → 64×64 Pixel
+#
+#  HINWEIS: Die api.actions sind bewusst NICHT hier definiert!
+#  Sie befinden sich direkt im api: Block von esp32-s3-box-3.yaml,
+#  da ESPHome api: Blöcke aus mehreren Packages nicht
+#  zuverlässig zusammenführt (Konflikt mit base.yaml).
+#
+#  Home Assistant Services (automatisch registriert):
+#    esphome.{name}_set_pixel_art    data: { pixel_data, label }
+#    esphome.{name}_clear_pixel_art
+#
+#  Home Assistant Entities:
+#    switch.{name}_pixel_art_mode    ← Modus ein/aus
+# ============================================================
+
+# ---------- Farbpalette (0-F, 16 Farben) ----------
+color:
+  - id: pa_0_black
+    hex: "000000"
+  - id: pa_1_white
+    hex: "FFFFFF"
+  - id: pa_2_red
+    hex: "FF0000"
+  - id: pa_3_lime
+    hex: "00FF00"
+  - id: pa_4_blue
+    hex: "0000FF"
+  - id: pa_5_yellow
+    hex: "FFFF00"
+  - id: pa_6_cyan
+    hex: "00FFFF"
+  - id: pa_7_magenta
+    hex: "FF00FF"
+  - id: pa_8_orange
+    hex: "FF8000"
+  - id: pa_9_purple
+    hex: "800080"
+  - id: pa_a_darkgreen
+    hex: "008000"
+  - id: pa_b_brown
+    hex: "8B4513"
+  - id: pa_c_pink
+    hex: "FF69B4"
+  - id: pa_d_lightblue
+    hex: "ADD8E6"
+  - id: pa_e_darkred
+    hex: "8B0000"
+  - id: pa_f_gray
+    hex: "808080"
+
+# ---------- Globale Variablen (Bilddaten im RAM) ----------
+globals:
+  - id: pixel_art_hex
+    type: std::string
+    restore_value: false
+    initial_value: '""'
+
+  - id: pixel_art_lbl
+    type: std::string
+    restore_value: false
+    initial_value: '""'
+
+# ---------- Switch: Pixel Art Modus ein/aus ----------
+switch:
+  - platform: template
+    name: "Pixel Art Mode"
+    id: pixel_art_mode
+    icon: "mdi:image-frame"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+    on_turn_on:
+      - lambda: id(voice_assistant_phase) = ${voice_assist_pixel_art_phase_id};
+      - script.execute: draw_display
+    on_turn_off:
+      - script.execute: set_idle_or_mute_phase
+      - script.execute: draw_display
