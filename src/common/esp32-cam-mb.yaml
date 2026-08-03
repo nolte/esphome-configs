@@ -17,16 +17,26 @@ esp32:
   framework:
     type: arduino
   flash_size: 4MB # explizit angeben
-psram: # ← FEHLT komplett!
+# Required by esp32_camera — do NOT remove. Bare `psram:` resolves to
+# mode: quad / speed: 40MHz on classic ESP32.
+psram:
+
+# SCCB (camera control) bus, declared explicitly so a device may add its own
+# I2C bus for sensors. `esp32_camera.i2c_pins:` is deprecated and cannot
+# coexist with a top-level `i2c:` block — see cam-07.
+i2c:
+  - id: ${id}_bus_sccb
+    sda: GPIO26
+    scl: GPIO27
+    scan: false
+
 esp32_camera:
   name: ${name}
   id: ${id}
   external_clock:
     pin: GPIO0
     frequency: 20MHz #10MHz
-  i2c_pins:
-    sda: GPIO26
-    scl: GPIO27
+  i2c_id: ${id}_bus_sccb
   data_pins: [GPIO5, GPIO18, GPIO19, GPIO21, GPIO36, GPIO39, GPIO34, GPIO35]
   vsync_pin: GPIO25
   href_pin: GPIO23
