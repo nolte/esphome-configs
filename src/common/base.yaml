@@ -34,6 +34,10 @@ logger:
 # Enable Home Assistant API
 # https://esphome.io/components/api.html
 api:
+  # Default is 15min: a device with no local automation would reboot every
+  # quarter hour while Home Assistant is down, discarding pulse counts and
+  # restarting sensor warm-up. 0 disables the reboot entirely.
+  reboot_timeout: 0s
 
 # https://esphome.io/components/mqtt.html
 # mqtt:
