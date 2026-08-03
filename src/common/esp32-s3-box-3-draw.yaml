@@ -121,7 +121,13 @@ api:
         - lambda: |-
             id(pixel_art_hex) = pixel_data;
             id(pixel_art_lbl) = label;
-        - lambda: id(voice_assistant_phase) = ${voice_assist_pixel_art_phase_id};
+        # Go through the switch instead of setting the phase directly. Setting
+        # only the phase left the switch off, so clear_pixel_art and the home
+        # button - which both only turn the switch off - never fired its
+        # on_turn_off, and the mode could not be left.
+        - switch.turn_on: pixel_art_mode
+        # on_turn_on fires only on an actual state change; redraw explicitly
+        # so new pixel data also lands while the mode is already active.
         - script.execute: draw_display
 
     # ── Pixel Art beenden ────────────────────────────────────
@@ -988,11 +994,11 @@ script:
     then:
       - lambda: |
           const auto timers = id(va).get_timers();
-          auto output_timer = timers.begin()->second;
+          auto output_timer = *timers.begin();
           for (auto &iterable_timer : timers) {
-            if (iterable_timer.second.is_active
-                && iterable_timer.second.seconds_left <= output_timer.seconds_left) {
-              output_timer = iterable_timer.second;
+            if (iterable_timer.is_active
+                && iterable_timer.seconds_left <= output_timer.seconds_left) {
+              output_timer = iterable_timer;
             }
           }
           id(global_first_active_timer) = output_timer;
@@ -1004,7 +1010,7 @@ script:
           const auto timers = id(va).get_timers();
           bool output = false;
           for (auto &iterable_timer : timers) {
-            if (iterable_timer.second.is_active) {
+            if (iterable_timer.is_active) {
               output = true;
             }
           }
@@ -1015,10 +1021,10 @@ script:
     then:
       - lambda: |
           const auto timers = id(va).get_timers();
-          auto output_timer = timers.begin()->second;
+          auto output_timer = *timers.begin();
           for (auto &iterable_timer : timers) {
-            if (iterable_timer.second.seconds_left <= output_timer.seconds_left) {
-              output_timer = iterable_timer.second;
+            if (iterable_timer.seconds_left <= output_timer.seconds_left) {
+              output_timer = iterable_timer;
             }
           }
           id(global_first_timer) = output_timer;

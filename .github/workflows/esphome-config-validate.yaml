@@ -1,0 +1,106 @@
+---
+# Validates every live device configuration with `esphome config`.
+#
+# Why this exists: every device file under src/ is composed from shared
+# packages in src/common/. Without this job, an edit to a shared package can
+# break a device nobody touched, and nothing catches it before flashing.
+#
+# Scope is deliberately src/*.yaml only:
+#   - src/archive/ holds retired configs that are not expected to resolve.
+#   - src/poc/ holds experimental scratch configs; 18 of 19 do not resolve
+#     today (their include fragments were archived). Operator decision
+#     2026-08-03: excluded from CI, left untouched.
+name: ESPHome config validation
+
+# push only, matching the other workflows in this repository. Adding
+# pull_request as well would run the whole matrix twice on every PR branch,
+# since a branch push already triggers it.
+on:
+  push:
+
+# Least privilege: this job only reads the repository.
+permissions:
+  contents: read
+
+# One run per ref; superseded runs are cancelled rather than left to finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    # `esphome config` fetches remote resources referenced by the configs
+    # (fonts, images, remote packages), so a hung download would otherwise sit
+    # in the 6h default. Generous against the ~1min the job actually takes.
+    timeout-minutes: 15
+    env:
+      # `esphome config` resolves !env_var, so these must be present. They are
+      # placeholders on purpose — validation never contacts a network, a
+      # device or Home Assistant, and no real credential belongs in CI.
+      # WIFI_PASSWORD is >= 8 characters to satisfy the WPA2 PSK constraint.
+      WIFI_DOMAIN: .example.invalid
+      WIFI_SSID: ci-validation-ssid
+      WIFI_PASSWORD: ci-validation-placeholder
+      WIFI_FALLBACK_PASSWORD: ci-validation-placeholder
+      MQTT_ENDPOINT: 127.0.0.1
+      MQTT_PORT: "1883"
+      MQTT_USERNAME: ci
+      MQTT_PASSWORD: ci-validation-placeholder
+      # The device configs render times and schedules; pin the zone so a
+      # runner-default UTC does not silently change what is validated.
+      TZ: Europe/Berlin
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Set up Python
+        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        with:
+          python-version: '3.13'
+
+      - name: Install ESPHome
+        run: pip install --disable-pip-version-check -r requirements-esphome.txt
+
+      - name: Report the ESPHome version under test
+        run: esphome version
+
+      - name: Validate every device configuration
+        working-directory: ./src
+        run: |
+          set -uo pipefail
+          failed=()
+          total=0
+          shopt -s nullglob
+          for config in *.yaml; do
+            total=$((total + 1))
+            echo "::group::${config}"
+            if esphome config "${config}" > /dev/null; then
+              echo "OK ${config}"
+            else
+              echo "::error file=src/${config}::esphome config failed"
+              failed+=("${config}")
+            fi
+            echo "::endgroup::"
+          done
+
+          if [ "${total}" -eq 0 ]; then
+            echo "::error::No device configurations found under src/ - the glob matched nothing."
+            exit 1
+          fi
+          echo "### ESPHome config validation" >> "${GITHUB_STEP_SUMMARY}"
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          echo "Validated ${total} device configurations." >> "${GITHUB_STEP_SUMMARY}"
+
+          if [ ${#failed[@]} -gt 0 ]; then
+            echo "" >> "${GITHUB_STEP_SUMMARY}"
+            echo "Failed (${#failed[@]}):" >> "${GITHUB_STEP_SUMMARY}"
+            for config in "${failed[@]}"; do
+              echo "- \`${config}\`" >> "${GITHUB_STEP_SUMMARY}"
+            done
+            echo "${#failed[@]} of ${total} configurations failed to validate."
+            exit 1
+          fi
+
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          echo "All ${total} configurations validate." >> "${GITHUB_STEP_SUMMARY}"

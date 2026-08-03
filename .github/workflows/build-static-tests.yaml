@@ -1,9 +1,20 @@
 on:
   push:
 
+# Least privilege by default; the security job widens this for itself below.
+permissions:
+  contents: read
+
+# One run per ref; superseded runs are cancelled rather than left to finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   static:
     uses: nolte/gh-plumbing/.github/workflows/reusable-pre-commit.yaml@d51e51ec3ec17ceea09fe9eb40ac00857b6fa1be # v2.0.0
+    permissions:
+      contents: read
 
   security:
     uses: nolte/gh-plumbing/.github/workflows/reusable-trivy.yaml@d51e51ec3ec17ceea09fe9eb40ac00857b6fa1be # v2.0.0
@@ -14,5 +25,7 @@ jobs:
 
   chain-bench:
     uses: nolte/gh-plumbing/.github/workflows/reusable-chain-bench.yaml@d51e51ec3ec17ceea09fe9eb40ac00857b6fa1be # v2.0.0
+    permissions:
+      contents: read
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}

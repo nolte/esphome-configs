@@ -3,12 +3,37 @@ version: '3'
 
 tasks:
   compile:
+    # NOTE: intentionally runs WITHOUT `-it`. Compiling is non-interactive, so
+    # no TTY is needed, and dropping it keeps this task usable from CI, hooks
+    # and any other non-TTY context. Do not "restore" it for symmetry with
+    # `run` - see the note there, where `-it` is required.
     desc: Compile The firmeware for Given Device
     dir: './src'
+    requires:
+      vars: [DEVICE_FILE]
+    vars:
+      DEVICE_NAME: '{{.DEVICE_FILE | replace ".yaml" ""}}'
     cmds:
+    # Older runs wrote the build cache as root, because the container ran as
+    # root against the bind mount. Those directories are unwritable now that
+    # the build runs as the calling user. Reclaim them with a root container
+    # so no host sudo (and therefore no TTY) is ever required.
+    - |
+      if [ -d .esphome ] && find .esphome ! -user "$(id -u)" -print -quit | grep -q .; then
+        echo "Reclaiming root-owned build cache from an earlier run..."
+        docker run --rm -v "${PWD}":/config --entrypoint chown \
+            ghcr.io/esphome/esphome -R "$(id -u):$(id -g)" /config/.esphome
+      fi
+    # --user: write build artefacts as the caller, not as root. This is what
+    #   removes the need for `sudo mv` / `sudo chown` further down.
+    # No --device / --privileged: compiling touches no hardware, and binding
+    #   /dev/ttyUSB0 made the task fail outright whenever nothing was plugged
+    #   in. Flashing lives in the `run` task, which keeps both.
     - |
       docker run \
-          --rm --privileged \
+          --rm \
+          --user "$(id -u):$(id -g)" \
+          -e HOME=/tmp \
           --network host \
           -v "${PWD}":/config \
           -e WIFI_DOMAIN=".fritz.box" \
@@ -20,14 +45,42 @@ tasks:
           -e MQTT_USERNAME="esphome" \
           -e MQTT_PASSWORD="notset" \
           -e TZ="Europe/Berlin" \
-          --device=/dev/ttyUSB0 \
-          -it ghcr.io/esphome/esphome compile {{.DEVICE_FILE}}
-    - sudo mv .esphome/build/{{.DEVICE_FILE| replace ".yaml" "" }}/.pioenvs/{{.DEVICE_FILE | replace ".yaml" "" }}/firmware.bin /tmp/
-    - sudo chown nolte:nolte /tmp/firmware.bin
-    - echo "Compiled firemware for {{.DEVICE_FILE}} are placed at /tmp/firmware.bin"
+          ghcr.io/esphome/esphome compile {{.DEVICE_FILE}}
+    # The image lands in different places depending on the build system:
+    # ESP-IDF writes build/firmware.factory.bin, PlatformIO (arduino/esp8266)
+    # writes .pioenvs/<name>/firmware.bin. The old hard-coded .pioenvs path
+    # silently pointed at nothing for every esp-idf device. Copy rather than
+    # move, so the build cache stays intact for the next incremental build,
+    # and name the target after the device so consecutive builds of different
+    # devices no longer overwrite each other.
+    - |
+      build_dir=".esphome/build/{{.DEVICE_NAME}}"
+      artifact=""
+      for candidate in \
+          "${build_dir}/build/firmware.factory.bin" \
+          "${build_dir}/.pioenvs/{{.DEVICE_NAME}}/firmware.bin"; do
+        if [ -f "${candidate}" ]; then artifact="${candidate}"; break; fi
+      done
+      if [ -z "${artifact}" ]; then
+        echo "No firmware image found under ${build_dir}" >&2
+        echo "Looked for build/firmware.factory.bin (ESP-IDF) and .pioenvs/{{.DEVICE_NAME}}/firmware.bin (PlatformIO)." >&2
+        exit 1
+      fi
+      dest="/tmp/{{.DEVICE_NAME}}-firmware.bin"
+      cp "${artifact}" "${dest}"
+      echo "Compiled firmware for {{.DEVICE_FILE}}: ${dest} (from ${artifact})"
 
 
   run:
+    # NOTE: `-it` below is REQUIRED here and must not be removed.
+    # `esphome run` is interactive: it prompts for how to flash the device
+    # (serial / USB vs. OTA over the network) and needs a TTY to present that
+    # choice and read the answer. Without `-it` the prompt cannot be shown and
+    # the task is unusable for its actual purpose.
+    #
+    # This is deliberately asymmetric with `compile` above, which has no
+    # prompt and therefore runs without `-it` so it stays usable from CI,
+    # hooks and any other non-TTY context.
     desc: Flash Device direct Direct or Over the Air
     dir: './src'
     cmds:

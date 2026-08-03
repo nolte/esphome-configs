@@ -1,0 +1,44 @@
+run_id: 2026-08-03-esphome-config-review
+skill: nolte-shared:requirements-elicit
+operation: elicit
+status: completed
+phase: artifact-written
+last_checkpoint_at: 2026-08-03
+inputs:
+  slug: esphome-config-review
+  subject: >-
+    Evidence-backed review of the esphome-configs repository (fleet-level
+    package architecture plus device-level review of all 34 top-level
+    configurations in src/), consolidated into one findings report, followed
+    by the approved fixes on this branch.
+  worktree: /home/nolte/repos/.worktrees/esphome-configs/esphome-config-review
+  branch: chore/esphome-config-review
+  upstream_plan: .resume/esphome-config-review/plan.md
+artifact: project/requirements/esphome-config-review.md
+thresholds:
+  tau_low: 0.4
+  tau_high: 0.8
+  self_consistency_k: 2
+  question_budget: 8
+questions_asked: 6
+termination: saturation
+gap_matrix:
+  functional: {applicable: true, c_d: 0.88, uncertainty: specification, evidence: "Q5 answer + teach-back R1-R3,R11"}
+  non_functional: {applicable: true, c_d: 0.85, uncertainty: specification, evidence: "Q4 + Q6 answers + teach-back R10,R12"}
+  constraints: {applicable: true, c_d: 0.88, uncertainty: interpretation, evidence: "plan §5 invariants + teach-back R13,R14"}
+  domain_objects: {applicable: true, c_d: 0.85, uncertainty: interpretation, evidence: "repo inspection + teach-back R3,R4"}
+  actors: {applicable: true, c_d: 0.82, uncertainty: interpretation, evidence: "teach-back R16"}
+  acceptance_criteria: {applicable: true, c_d: 0.88, uncertainty: specification, evidence: "Q1 answer + teach-back R5"}
+  edge_cases: {applicable: true, c_d: 0.85, uncertainty: specification, evidence: "Q3 answer + teach-back R6-R9"}
+  scope_boundaries: {applicable: true, c_d: 0.88, uncertainty: specification, evidence: "Q2 answer + teach-back R4"}
+u_gate: 0.82
+teach_backs_confirmed:
+  - turn: 7
+    scope: R1-R16
+    result: "Alles bestätigt"
+plan_open_questions_resolved:
+  q1_fix_branch: "this branch, scope-level approval once"
+  q2_archive: "leak- and live-reference check only"
+  q3_commit_report: "NO — .audits/ gitignored, branch carries only fixes (deviates from plan default)"
+  q4_secrets_baseline: "no — static review as written"
+  q5_ci_push: "implement AND activate esphome config validation (deviates from plan default)"
