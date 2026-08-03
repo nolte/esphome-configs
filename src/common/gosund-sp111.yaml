@@ -12,6 +12,11 @@ defaults:
 
 esp8266:
   board: esp8285
+  # Relays must not pulse while the pins are initialised on boot and OTA.
+  early_pin_init: False
+  # Four packages in this graph use restore_value / restore_mode, and
+  # docs/packages/timer-cancelable.md claims the value is persistent.
+  restore_from_flash: true
   framework:
     version: recommended
 
