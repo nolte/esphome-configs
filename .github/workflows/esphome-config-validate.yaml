@@ -1,9 +1,9 @@
 ---
 # Validates every live device configuration with `esphome config`.
 #
-# Why this exists: this repository composes 33 device files from shared
-# packages under src/common/. Without this job, an edit to a shared package
-# can break a device nobody touched, and nothing catches it before flashing.
+# Why this exists: every device file under src/ is composed from shared
+# packages in src/common/. Without this job, an edit to a shared package can
+# break a device nobody touched, and nothing catches it before flashing.
 #
 # Scope is deliberately src/*.yaml only:
 #   - src/archive/ holds retired configs that are not expected to resolve.
@@ -30,6 +30,10 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    # `esphome config` fetches remote resources referenced by the configs
+    # (fonts, images, remote packages), so a hung download would otherwise sit
+    # in the 6h default. Generous against the ~1min the job actually takes.
+    timeout-minutes: 15
     env:
       # `esphome config` resolves !env_var, so these must be present. They are
       # placeholders on purpose — validation never contacts a network, a
@@ -56,7 +60,7 @@ jobs:
           python-version: '3.13'
 
       - name: Install ESPHome
-        run: pip install --disable-pip-version-check esphome
+        run: pip install --disable-pip-version-check -r requirements-esphome.txt
 
       - name: Report the ESPHome version under test
         run: esphome version
@@ -66,8 +70,10 @@ jobs:
         run: |
           set -uo pipefail
           failed=()
+          total=0
           shopt -s nullglob
           for config in *.yaml; do
+            total=$((total + 1))
             echo "::group::${config}"
             if esphome config "${config}" > /dev/null; then
               echo "OK ${config}"
@@ -78,7 +84,10 @@ jobs:
             echo "::endgroup::"
           done
 
-          total=$(ls -1 *.yaml | wc -l)
+          if [ "${total}" -eq 0 ]; then
+            echo "::error::No device configurations found under src/ - the glob matched nothing."
+            exit 1
+          fi
           echo "### ESPHome config validation" >> "${GITHUB_STEP_SUMMARY}"
           echo "" >> "${GITHUB_STEP_SUMMARY}"
           echo "Validated ${total} device configurations." >> "${GITHUB_STEP_SUMMARY}"
