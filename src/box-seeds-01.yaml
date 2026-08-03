@@ -10,7 +10,7 @@ packages:
   base: !include
     file: ./common/base.yaml
     vars:
-      project_name: "Setzling_Box_01"
+      project_name: "nolte.box-seeds"
       project_version: "ESP-111"
 
   intervall: !include

@@ -24,7 +24,7 @@ packages:
   base: !include
     file: ./common/base.yaml
     vars:
-      project_name: "Fementierungs Box"
+      project_name: "nolte.box-fementation"
       project_version: "ESP-111"
 
   time: !include ./common/time.yaml
