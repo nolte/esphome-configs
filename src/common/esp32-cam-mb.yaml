@@ -19,7 +19,13 @@ esp32:
   flash_size: 4MB # explizit angeben
 # Required by esp32_camera — do NOT remove. Bare `psram:` resolves to
 # mode: quad / speed: 40MHz on classic ESP32.
+#
+# ignore_not_found defaults to true, which lets a module without physical
+# PSRAM boot, join WiFi and look healthy in Home Assistant while the camera
+# silently fails. At 1024x768 / jpeg_quality 10 there is no graceful
+# fallback, so fail loudly instead.
 psram:
+  ignore_not_found: false
 
 # SCCB (camera control) bus, declared explicitly so a device may add its own
 # I2C bus for sensors. `esp32_camera.i2c_pins:` is deprecated and cannot
