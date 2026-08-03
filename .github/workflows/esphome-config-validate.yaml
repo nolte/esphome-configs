@@ -12,9 +12,11 @@
 #     2026-08-03: excluded from CI, left untouched.
 name: ESPHome config validation
 
+# push only, matching the other workflows in this repository. Adding
+# pull_request as well would run the whole matrix twice on every PR branch,
+# since a branch push already triggers it.
 on:
   push:
-  pull_request:
 
 # Least privilege: this job only reads the repository.
 permissions:
