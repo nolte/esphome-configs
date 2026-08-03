@@ -66,6 +66,10 @@ sensor:
     temperature_offset: 1.5 °C
     address: 0x61
     update_interval: 15s
+    # Defaults to true. ASC assumes the sensor sees fresh air regularly and
+    # recalibrates its baseline against it - in a sealed fermentation box it
+    # instead drifts, and CO2 reads progressively low with no error state.
+    automatic_self_calibration: false
 
   # - platform: scd30
   #   i2c_id: multiplex0channel5
