@@ -42,6 +42,7 @@ datetime:
     optimistic: yes
     initial_value: "${time_start}"
     restore_value: true
+    time_id: ${id}_sntp_time
     on_time:
       - script.execute: ${id}_intervall_start
       - script.wait: ${id}_intervall_start
@@ -54,6 +55,7 @@ datetime:
     optimistic: yes
     initial_value: "${time_end}"
     restore_value: true
+    time_id: ${id}_sntp_time
     on_time:
       - script.execute: ${id}_intervall_stop
       - script.wait: ${id}_intervall_stop

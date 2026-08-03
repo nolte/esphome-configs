@@ -11,6 +11,8 @@ sensor:
   - platform: total_daily_energy
     name: "${name} - Electric Consumption [kWh]"
     power_id: "${id}_watt"
+    # Explicit: the daily reset must not depend on package merge order.
+    time_id: ${id}_homeassistant_time
     filters:
       # Multiplication factor from W to kW is 0.001
       - multiply: 0.001

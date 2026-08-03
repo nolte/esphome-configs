@@ -1,5 +1,13 @@
 # Reuseable module for sync the local device Time with running Home assistant
 # more information at https://esphome.io/components/time/homeassistant/
+
+defaults:
+  # Without this, ESPHome falls back to the build host's zone - and the build
+  # runs inside a container, i.e. UTC. Every schedule, every rendered clock
+  # and every daily-energy reset would then be an hour or two off.
+  timezone: Europe/Berlin
+
 time:
   - platform: homeassistant
     id: ${id}_homeassistant_time
+    timezone: ${timezone}
