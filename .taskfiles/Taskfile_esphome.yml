@@ -3,6 +3,10 @@ version: '3'
 
 tasks:
   compile:
+    # NOTE: intentionally runs WITHOUT `-it`. Compiling is non-interactive, so
+    # no TTY is needed, and dropping it keeps this task usable from CI, hooks
+    # and any other non-TTY context. Do not "restore" it for symmetry with
+    # `run` - see the note there, where `-it` is required.
     desc: Compile The firmeware for Given Device
     dir: './src'
     cmds:
@@ -28,6 +32,15 @@ tasks:
 
 
   run:
+    # NOTE: `-it` below is REQUIRED here and must not be removed.
+    # `esphome run` is interactive: it prompts for how to flash the device
+    # (serial / USB vs. OTA over the network) and needs a TTY to present that
+    # choice and read the answer. Without `-it` the prompt cannot be shown and
+    # the task is unusable for its actual purpose.
+    #
+    # This is deliberately asymmetric with `compile` above, which has no
+    # prompt and therefore runs without `-it` so it stays usable from CI,
+    # hooks and any other non-TTY context.
     desc: Flash Device direct Direct or Over the Air
     dir: './src'
     cmds:
@@ -46,4 +59,4 @@ tasks:
           -e MQTT_PASSWORD="notset" \
           -e TZ="Europe/Berlin" \
           --device=/dev/ttyUSB0 \
-          ghcr.io/esphome/esphome run {{.DEVICE_FILE}}
+          -it ghcr.io/esphome/esphome run {{.DEVICE_FILE}}
