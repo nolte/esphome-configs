@@ -25,3 +25,9 @@ sensor:
             - 60 -> 2
             - 120 -> 3
             - 240 -> 4
+      # An empty tank or a dead sensor yields 0 pulses/min, and the line
+      # through (10 -> 0) and (30 -> 1) extrapolates that to -0.5 lvl. Clamp
+      # after the calibration, not before: the negative value is produced by
+      # calibrate_linear, not by the pulse rate.
+      - clamp:
+          min_value: 0
