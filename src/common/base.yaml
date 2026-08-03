@@ -1,6 +1,9 @@
 defaults:
   project_name: "NOUS.Smart-Wifi-Socket"
   project_version: "A1T"
+  # Consumed unconditionally by esphome.comment below. Without a default,
+  # every device that does not set `comment:` fails to resolve.
+  comment: ""
 
 esphome:
   name: ${name}
