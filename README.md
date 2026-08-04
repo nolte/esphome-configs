@@ -2,19 +2,20 @@
 
 [![Static CI Tests](https://github.com/nolte/esphome-configs/actions/workflows/build-static-tests.yaml/badge.svg)](https://github.com/nolte/esphome-configs/actions/workflows/build-static-tests.yaml)
 
-A DRY, self-hosted collection of [ESPHome](https://esphome.io/) device configurations. Concrete
-devices are tiny YAML files that compose reusable building blocks, so behaviour like Wi-Fi,
-diagnostics, relays, timers, and sensors is defined once and shared across many devices.
+A duplication-free collection of [ESPHome](https://esphome.io/) device configurations for
+do-it-yourself smart-home makers running a self-hosted
+[Home Assistant](https://www.home-assistant.io/). Each device is a tiny YAML file composing
+reusable building blocks, so Wi-Fi, diagnostics, relays, timers, and sensors have one definition.
 
 ## Purpose
 
 - Manage many ESPHome devices without copying full configs: each device composes shared packages.
-- Built for DIY smart-home makers running a self-hosted [Home Assistant](https://www.home-assistant.io/)
-  setup, comfortable with YAML and flashing firmware.
+- Built for do-it-yourself smart-home makers running a self-hosted Home Assistant setup,
+  comfortable with YAML and flashing firmware.
 - Covers smart plugs (Gosund SP111, NOUS A1T), ESP32 cameras, displays and voice (ESP32-S3-BOX-3,
   Ulanzi TC001), and sensors (SHT3x-D, SoMoSe, multi-point liquid level).
-- Keeps Wi-Fi and MQTT credentials out of the repository: they're read from environment variables
-  at compile time.
+- Keeps Wi-Fi and Message Queuing Telemetry Transport (MQTT) credentials out of the repository:
+  they're read from environment variables at compile time.
 
 ## Usage
 
@@ -38,17 +39,26 @@ packages:
       kill_sensor_entity: binary_sensor.water_leak
 ```
 
-`common/gosund-sp111.yaml` in turn includes `common/base.yaml` (Wi-Fi, API, OTA, diagnostic
-sensors), so a new plug is ~10 lines instead of a full config.
+`common/gosund-sp111.yaml` in turn includes `common/base.yaml`. That package supplies Wi-Fi, the
+native API that Home Assistant connects over, over-the-air updates, and diagnostic sensors. A new
+plug is therefore ~10 lines instead of a full config.
+
+### Use a package outside this repository
+
+The packages assume this repository's layout: `common/gosund-sp111.yaml` includes
+`common/base.yaml`, and the behaviour packages expect the substitutions that `base.yaml` defines.
+Copying one file into another project means copying `common/base.yaml` with it and adapting those
+substitutions. These fragments ship only as part of this repository, not as a versioned package.
 
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/): ESPHome runs through `ghcr.io/esphome/esphome`,
-  so no local Python install is needed.
+  so you don't need a local Python install.
 - [go-task](https://taskfile.dev/): the task runner (`task -l` lists everything).
 - [`pass`](https://www.passwordstore.org/): supplies Wi-Fi secrets to the build
   (`network/wifi/ssid`, `network/wifi/password`).
-- An ESP device on `/dev/ttyUSB0` for the first, serial flash; later updates go over the air.
+- `jq`: only for the Ansible / NetBox inventory path below.
+- The target device on `/dev/ttyUSB0` for the first, serial flash. Later updates go over the air.
 
 ### Compile and flash
 
@@ -72,13 +82,16 @@ task esphome:run DEVICE_FILE="nous-a1t-08.yaml --device=192.168.x.x"
 ```
 
 The compile and run tasks inject the Wi-Fi (and optional MQTT) credentials as environment
-variables from `pass`. Review `.taskfiles/Taskfile_esphome.yml` before the first run to match your
-network, timezone, and serial device.
+variables from `pass`. Review `.taskfiles/Taskfile_esphome.yml` before the first run: the `pass`
+entry paths (`network/wifi/ssid`, `network/wifi/password`), the `Europe/Berlin` timezone, and the
+`/dev/ttyUSB0` serial device are hard-wired there. A different password manager means replacing
+those `pass` calls.
 
 ### Flashing from an Ansible / NetBox inventory
 
-Device configs can also be resolved from a locally running NetBox deployment through an Ansible
-inventory:
+Optional, and only relevant if you already keep your devices in a NetBox inventory. Instead of
+naming the config file and the target address by hand, an Ansible inventory pulls both from the
+device's NetBox record:
 
 ```sh
 export ANSIBLE_INVENTORY=~/repos/github/argo-charts/src/applications/netbox/configuration/inventory/inventory.yaml
@@ -90,11 +103,17 @@ task esphome:run \
 
 ## Documentation
 
-Per-device and per-package documentation lives under `docs/` and is built with MkDocs:
+Per-device and per-package documentation lives under `docs/`, and MkDocs builds the site:
 
 ```sh
 task mkdocs:start   # live preview on http://localhost:8002
 ```
+
+The `name` substitution determines the entity IDs Home Assistant sees, and the address that
+over-the-air updates resolve (`use_address` in `common/base.yaml`). Renaming it breaks every
+automation and dashboard that references the old IDs, so treat it as a published contract rather
+than a local detail. The `id` substitution stays inside ESPHome: it names components so the config
+can cross-reference them, as in `switch.toggle: ${id}_button_switch`.
 
 ## Structure
 
@@ -123,6 +142,6 @@ docs/               # MkDocs documentation source
 
 ## Status
 
-Personal, actively maintained collection. Device configs are added and revised as the hardware
-setup changes; entries under `src/poc/` and `src/archive/` are experimental or retired and not
-kept production-ready.
+Personal, actively maintained collection. Device configs arrive and change along with the hardware
+setup. Entries under `src/poc/` and `src/archive/` are experimental or retired rather than
+production-ready.
