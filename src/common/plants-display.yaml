@@ -1,0 +1,657 @@
+# ============================================================
+#  plants-display.yaml  –  Common Package
+#
+#  Zeigt Pflanzen-Infos aus Home Assistant auf dem 320x240-Panel
+#  der ESP32-S3-BOX-3 und rotiert durch sie durch: eine Pflanze
+#  pro Seite, mit Gieszustand als Hero-Icon, naechster Giesszeit,
+#  einer Alert-Zeile und der Position in der Rotation.
+#
+#  Einzuhaengen PARALLEL zu common/esp32-s3-box-3-draw.yaml, das
+#  das Panel, das Bild casita_idle und das Script draw_display
+#  mitbringt. Das Device-File setzt zusaetzlich
+#
+#      idle_screen_script: show_plants_screen
+#
+#  damit der Idle-Zustand hier landet statt beim Casita-Bild.
+#
+#  Gedacht als Anzeige fuer die Kamerplanter-Integration
+#  (https://github.com/nolte/kamerplanter-ha), die Pflanzen,
+#  Pflegeprofile und Aufgaben bereits als HA-Entities modelliert.
+#  Dieses Paket kennt Kamerplanter aber bewusst NICHT: es nimmt
+#  fertige Strings entgegen, das Mapping liegt in genau einer
+#  HA-Automation (siehe docs/packages/plants-display.md). Damit
+#  funktioniert jede andere Pflanzenquelle genauso.
+#
+#  DATENWEG (siehe spec ha/esphome-ha-driven-content):
+#  Home Assistant fuellt Slots per api action, das Geraet rotiert
+#  selbst. Damit reagieren Rotation und Touch ohne Netzrunde, und
+#  ein kurzer HA-Ausfall verliert die Pflanzenliste nicht.
+#
+#      esphome.<node>_set_plant(index, total, name, next_watering,
+#                               water_level, alert, alert_level)
+#      esphome.<node>_clear_plants()
+#
+#  Die HA-Automation laeuft einmal per repeat/for_each ueber ihre
+#  Pflanzen - NICHT im Rotationstakt.
+#
+#  DESIGNSYSTEM (spec ha/esp32-s3-box-display-design):
+#  Farben ausschliesslich aus den elf benannten Palettenrollen
+#  (Home-Assistant-Dark-Tokens), Typo aus der vierstufigen Skala
+#  in Roboto, Icons als MDI in 24/96 px. Kein Hex-Literal in einer
+#  Seiten-Lambda, kein Zustand allein durch Farbe unterschieden.
+#
+#  BEWUSSTE ABWEICHUNGEN, damit sie nicht als Drift gelesen werden:
+#  - f_hero (48 px) wird NICHT deklariert. Der aus Raumdistanz
+#    lesbare Traeger dieser Seite ist das 96-px-Icon; ein zweiter
+#    Hero-Kanal waere Flash fuer nichts (siehe Kostenblock unten).
+#  - Die Alert-Zeile laeuft in f_body/c_text statt in f_caption/
+#    c_text_dim. Eine Warnung, die man auf 0,5 m entziffern muss,
+#    ist keine Warnung.
+#  - Fonts sind Roboto, nicht das ${font_family} (Figtree) der
+#    Draw-Datei. Die Casita-Seiten dort bleiben unangetastet.
+# ============================================================
+
+substitutions:
+  # Weiterschalt-Takt. Ein Tippen aufs Display setzt ihn zurueck.
+  #
+  # Bewusst NICHT kuerzer: ein Vollbild-Redraw blockiert den Loop rund
+  # 95 ms (150 KB ueber SPI bei 40 MHz sind allein 30 ms, dazu das
+  # Text-Rendering). Das faellt in den Idle-Zustand - also genau in die
+  # Zeit, in der micro_wake_word lauscht. Faellt ein Wake Word in dieses
+  # Fenster, gehen Audio-Frames verloren und es wird verpasst.
+  #
+  # Auf einem Geraet, das NUR anzeigt und keinen Voice Assistant hat,
+  # kann der Wert gefahrlos heruntergesetzt werden.
+  plant_rotation_interval: 60s
+
+  # Obergrenze fuer die Slots. Schuetzt gegen einen fehlerhaften
+  # HA-Aufruf, der das Geraet mit einem riesigen total den Speicher
+  # kostet. 16 Pflanzen fuellen das Panel schon lange nicht mehr
+  # mit Punkten, siehe plant_dots_max.
+  plant_max_slots: "16"
+
+  # Bis zu wie vielen Pflanzen die Position als Punktreihe statt
+  # als "3/14" gezeichnet wird. 12 Punkte a 14px = 154px, passt
+  # mittig in die 320px breite Statuszeile.
+  plant_dots_max: "12"
+
+  # Zeichen-Budgets, siehe Tabelle unten. Angewendet werden sie in
+  # der api action, nicht in der Seiten-Lambda: eine Lambda rendert,
+  # sie rechnet nicht (spec ha/esp32-s3-box-display).
+  #
+  #  Font        Groesse  Box    nutzbar  Budget
+  #  ----------  -------  -----  -------  ------
+  #  f_display   28 px    280px  280px    16   (Pflanzenname)
+  #  f_display   28 px    280px  280px    16   (Giesszeit)
+  #  f_body      16 px    248px  248px    26   (Alert, neben 24px-Glyph)
+  #
+  #  Hochgerechnet aus dem gemessenen Referenzwert der offiziellen
+  #  BOX-3-Config (Figtree 15px in 280px Rahmen ~ 32 Zeichen), auf
+  #  Roboto und die jeweilige Groesse skaliert und konservativ
+  #  abgerundet. ABGELEITET, NICHT AM PANEL GEMESSEN - beim ersten
+  #  Flash gegen einen langen Pflanzennamen pruefen und korrigieren.
+  #
+  #  Gezaehlt werden Bytes, nicht Glyphen: ein Umlaut kostet in
+  #  UTF-8 zwei. Das kuerzt deutsche Texte etwas frueher als noetig,
+  #  schneidet aber garantiert kein Zeichen mittendurch.
+  plant_name_chars: "16"
+  plant_watering_chars: "16"
+  plant_alert_chars: "26"
+
+# ============================================================
+#  FARBEN – die elf Palettenrollen
+# ============================================================
+#  Wortwoertlich aus spec ha/esp32-s3-box-display-design uebernommen:
+#  die Home-Assistant-Dark-Tokens, aufgeloest auf konkrete Werte.
+#  Die ids sind normativ - eine Seite referenziert Rollen, keine
+#  Literale. Alle elf werden deklariert, auch wo dieses Paket sie
+#  (noch) nicht zeichnet, damit die Palette als Ganzes vorliegt und
+#  eine spaetere Seite nicht anfaengt, sich eine Farbe auszudenken.
+#
+#  Kontrast ist auf den QUANTISIERTEN Werten gerechnet (RGB565):
+#  auf c_bg erreichen c_text 21.0, c_text_dim 13.4, c_ok 7.15,
+#  c_warn 7.14, c_alarm 7.03, c_disabled 4.86 - alle ueber der
+#  4.5:1-Schwelle fuer Text unter 24 px.
+color:
+  - id: c_bg              # surface-lower    – Vollflaechen-Hintergrund
+    hex: "000000"
+  - id: c_surface         # surface-default  – Panels, gerahmte Kaesten
+    hex: "202020"
+  - id: c_surface_low     # surface-low      – abgesenkte Flaechen
+    hex: "141414"
+  - id: c_text            # text-primary
+    hex: "FFFFFF"
+  - id: c_text_dim        # text-secondary   – Labels, Sekundaertext
+    hex: "CCCCCC"
+  - id: c_disabled        # on-disabled-normal – nicht verfuegbar
+    hex: "7A7A7A"
+  - id: c_border          # border-neutral-quiet – nur Struktur, nie Text
+    hex: "5E5E5E"
+  - id: c_accent          # on-primary-normal – aktiv, ausgewaehlt
+    hex: "37C8FD"
+  - id: c_ok              # on-success-normal – gesund, erledigt
+    hex: "00AC49"
+  - id: c_warn            # on-warning-normal – Aufmerksamkeit
+    hex: "F36D00"
+  - id: c_alarm           # on-danger-normal  – Stoerung, faellig
+    hex: "F3676C"
+
+# ============================================================
+#  FONTS – die Typo-Skala
+# ============================================================
+#  Roboto, weil das die HA-Frontend-Schrift ist und ein BOX-Schirm
+#  und ein HA-Dashboard dieselbe Anmutung haben sollen. Bewusst
+#  NICHT ${font_family} (Figtree) der Draw-Datei - deren Casita-
+#  Seiten behalten ihre Fonts, dieses Paket bringt seine eigenen mit.
+#
+#  Ein Font wird pro Groesse rasterisiert; jede Groesse ist eine
+#  eigene font-Komponente und kostet Flash. size ist ueberall
+#  explizit gesetzt: der Schluessel ist optional und faellt sonst
+#  still auf 20 px zurueck.
+#
+#  f_hero (48 px) fehlt absichtlich, siehe Kopfkommentar.
+font:
+  # Statusstreifen, Zaehler. Untergrenze der Skala, Nahfeld.
+  - file:
+      type: gfonts
+      family: Roboto
+      weight: 400
+    id: f_caption
+    size: 12
+    glyphsets:
+      - ${font_glyphsets}
+  # Die Alert-Zeile.
+  - file:
+      type: gfonts
+      family: Roboto
+      weight: 400
+    id: f_body
+    size: 16
+    glyphsets:
+      - ${font_glyphsets}
+  # Pflanzenname UND Giesszeit. bpp 4, weil grosse Glyphen ihre
+  # Treppe zeigen. Beide auf derselben Stufe: die Skala kennt
+  # zwischen 16 und 28 nichts, und 16 war fuer den Namen zu klein.
+  # Die Hierarchie traegt daher nicht die Groesse, sondern Farbe
+  # (gedimmt gegen Zustandsfarbe) und Ausrichtung (links gegen
+  # zentriert).
+  - file:
+      type: gfonts
+      family: Roboto
+      weight: 500
+    id: f_display
+    size: 28
+    bpp: 4
+    glyphsets:
+      - ${font_glyphsets}
+
+# ============================================================
+#  ICONS – MDI, ein Asset je Glyph
+# ============================================================
+#  type GRAYSCALE + transparency alpha_channel: ein Byte pro Pixel,
+#  und der Zeichenpfad mischt color_on gegen color_off pro Pixel.
+#  Damit traegt EIN Asset jede Zustandsfarbe, mit erhaltenem
+#  Anti-Aliasing. Deshalb bekommt jeder Zustand hier ein eigenes
+#  GLYPH (nicht eine eigene Farbversion desselben Glyphs): Farbe
+#  darf nie der einzige Unterschied zwischen zwei Zustaenden sein.
+#
+#  Die Silhouetten sind absichtlich verschieden statt semantisch
+#  fein: auf 48 mm loest das Auge die Umrissform auf, nicht das
+#  Detail. Deshalb Giesskanne fuer den dringendsten Zustand - die
+#  einzige Form, die kein Tropfen ist.
+#
+#  Deklarationsform: min_version der Draw-Datei ist 2025.5.0, also
+#  die platform-lose Legacy-Form, wie die Casita-Bilder daneben.
+#  Ab 2026.7.0 waere platform: file zu setzen; die Legacy-Form
+#  verschwindet in 2027.1.0.
+#
+#  Flash: 96px-Glyph 9 KiB, 24px-Glyph 576 B  ->  4x9 + 2x0,6 = ~37 KiB.
+image:
+  # ── Hero, 96 px: der Gieszustand ────────────────────────
+  - file: mdi:water-check
+    id: ic_water_ok
+    resize: 96x96
+    type: GRAYSCALE
+    transparency: alpha_channel
+  - file: mdi:water-alert
+    id: ic_water_soon
+    resize: 96x96
+    type: GRAYSCALE
+    transparency: alpha_channel
+  - file: mdi:watering-can
+    id: ic_water_due
+    resize: 96x96
+    type: GRAYSCALE
+    transparency: alpha_channel
+  # Eigener Glyph fuer "keine Daten" - sonst waere unbekannt von
+  # gesund nur durch die Farbe zu unterscheiden.
+  - file: mdi:help-circle-outline
+    id: ic_water_unknown
+    resize: 96x96
+    type: GRAYSCALE
+    transparency: alpha_channel
+
+  # ── Alert-Glyphen, 24 px ────────────────────────────────
+  # Kreis gegen Dreieck: die Paarung, die auch bei halber
+  # Helligkeit und bei Rot-Gruen-Schwaeche noch traegt.
+  - file: mdi:information-outline
+    id: ic_alert_notice
+    resize: 24x24
+    type: GRAYSCALE
+    transparency: alpha_channel
+  - file: mdi:alert
+    id: ic_alert_urgent
+    resize: 24x24
+    type: GRAYSCALE
+    transparency: alpha_channel
+
+# ============================================================
+#  GLOBALS – der Slot-Puffer
+# ============================================================
+#  Ein Vektor je Feld, alle auf dieselbe Laenge (total) gehalten.
+#  restore_value: false ist bei nicht-trivialen Typen Pflicht - und
+#  richtig: die Daten gehoeren Home Assistant und kommen nach einem
+#  Reboot ohnehin neu.
+globals:
+  - id: plant_names
+    type: std::vector<std::string>
+    restore_value: false
+  - id: plant_watering
+    type: std::vector<std::string>
+    restore_value: false
+  - id: plant_water_levels
+    type: std::vector<int>
+    restore_value: false
+  - id: plant_alerts
+    type: std::vector<std::string>
+    restore_value: false
+  - id: plant_alert_levels
+    type: std::vector<int>
+    restore_value: false
+  - id: plant_index
+    type: int
+    restore_value: false
+    initial_value: "0"
+
+# ============================================================
+#  API ACTIONS – Home Assistant fuellt die Slots
+# ============================================================
+api:
+  # Nach einem Reboot ist der Slot-Puffer leer - die Daten liegen bei Home
+  # Assistant, nicht hier. Statt darauf zu warten, dass die HA-Automation
+  # zufaellig das naechste Mal laeuft, fragt das Geraet aktiv danach, sobald
+  # die Verbindung steht. Die HA-Automation triggert auf dieses Event.
+  #
+  # Setzt voraus, dass in der ESPHome-Integration in Home Assistant
+  # "Allow the device to perform Home Assistant actions" fuer dieses Geraet
+  # aktiviert ist.
+  on_client_connected:
+    - script.execute: request_plant_data
+
+  actions:
+    # ── Einen Slot setzen ────────────────────────────────────
+    # HA Service: esphome.<node>_set_plant
+    #   index         (int)    : 0-basierte Position
+    #   total         (int)    : Gesamtzahl der Pflanzen
+    #   name          (string) : Anzeigename
+    #   next_watering (string) : fertig formatiert, z.B. "in 3 Tagen"
+    #   water_level   (int)    : 0 ok, 1 bald faellig, 2 faellig/ueberfaellig,
+    #                            3 keine Daten. Traegt Hero-Glyph UND Farbe.
+    #   alert         (string) : offene Aufgabe / Ueberwinterung, "" = keiner
+    #   alert_level   (int)    : 0 keiner, 1 Hinweis, 2 dringend
+    #
+    # Idempotent und reihenfolgeunabhaengig: HA darf die Slots in
+    # beliebiger Folge schicken, jeder Aufruf traegt sein total mit.
+    - action: set_plant
+      variables:
+        index: int
+        total: int
+        name: string
+        next_watering: string
+        water_level: int
+        alert: string
+        alert_level: int
+      then:
+        - if:
+            condition:
+              lambda: |-
+                return total <= 0 || total > ${plant_max_slots} ||
+                       index < 0 || index >= total;
+            then:
+              - api.respond:
+                  success: false
+                  error_message: "index must be 0..total-1 and total 1..${plant_max_slots}"
+            else:
+              - lambda: |-
+                  // UTF-8-sicher auf ein Byte-Budget kuerzen. Ein Schnitt
+                  // mitten in einer Mehrbyte-Sequenz wuerde als Muell-Glyph
+                  // enden, deshalb bis zum Sequenzanfang zurueckgehen.
+                  auto clip = [](const std::string &s, size_t limit) -> std::string {
+                    if (s.length() <= limit) return s;
+                    size_t cut = (limit > 3) ? limit - 3 : limit;
+                    while (cut > 0 && (((unsigned char) s[cut]) & 0xC0) == 0x80) cut--;
+                    return s.substr(0, cut) + "...";
+                  };
+
+                  size_t t = (size_t) total;
+                  id(plant_names).resize(t);
+                  id(plant_watering).resize(t);
+                  id(plant_water_levels).resize(t);
+                  id(plant_alerts).resize(t);
+                  id(plant_alert_levels).resize(t);
+
+                  size_t i = (size_t) index;
+                  id(plant_names)[i] = clip(name, ${plant_name_chars});
+                  id(plant_watering)[i] = clip(next_watering, ${plant_watering_chars});
+                  id(plant_alerts)[i] = clip(alert, ${plant_alert_chars});
+
+                  // Ausserhalb des Wertebereichs heisst "weiss ich nicht",
+                  // nicht "alles gut" - ein falscher HA-Aufruf darf keine
+                  // gesunde Pflanze vortaeuschen.
+                  id(plant_water_levels)[i] = (water_level < 0 || water_level > 3)
+                                            ? 3 : water_level;
+                  id(plant_alert_levels)[i] = (alert_level < 0) ? 0
+                                            : (alert_level > 2) ? 2 : alert_level;
+
+                  // Der Index kann durch ein geschrumpftes total aus dem
+                  // Bereich gefallen sein.
+                  if (id(plant_index) >= (int) t) id(plant_index) = 0;
+              # Nur zeichnen, wenn genau der sichtbare Slot geschrieben
+              # wurde - sonst schiebt ein Push von 7 Pflanzen 7 volle
+              # Frames ueber den SPI-Bus.
+              - if:
+                  condition:
+                    lambda: return index == id(plant_index);
+                  then:
+                    - script.execute: draw_display
+              - script.execute: plant_rotate_timer
+              - api.respond:
+                  success: true
+
+    # ── Pflanzenliste leeren ─────────────────────────────────
+    # HA Service: esphome.<node>_clear_plants
+    # Das Geraet faellt damit auf das Casita-Idle-Bild zurueck.
+    - action: clear_plants
+      then:
+        - script.stop: plant_rotate_timer
+        - lambda: |-
+            id(plant_names).clear();
+            id(plant_watering).clear();
+            id(plant_water_levels).clear();
+            id(plant_alerts).clear();
+            id(plant_alert_levels).clear();
+            id(plant_index) = 0;
+        - script.execute: draw_display
+
+# ============================================================
+#  TOUCH – Tippen blaettert weiter
+# ============================================================
+#  Der GT911 deckt auch den Home-Button unterhalb des Panels ab.
+#  Der liegt ausserhalb von 0..239, deshalb die y-Schranke: sonst
+#  wuerde der Home-Button zusaetzlich weiterblaettern.
+touchscreen:
+  on_touch:
+    - if:
+        condition:
+          lambda: return touch.y < 240;
+        then:
+          - script.execute: plant_next
+          # Nach einem Tippen faengt der Takt von vorn an, damit die
+          # angetippte Pflanze nicht sofort wieder wegspringt.
+          - script.execute: plant_rotate_timer
+
+# ============================================================
+#  SCRIPTS
+# ============================================================
+script:
+  # ── Idle-Anzeige dieses Devices ──────────────────────────
+  # Haengt am Erweiterungspunkt ${idle_screen_script} von
+  # esp32-s3-box-3-draw.yaml. Der einzige Ort, an dem entschieden
+  # wird, ob schon Pflanzendaten da sind.
+  - id: show_plants_screen
+    then:
+      - if:
+          condition:
+            lambda: return id(plant_names).empty();
+          then:
+            - display.page.show: idle_page
+          else:
+            - display.page.show: plant_page
+      - component.update: s3_box_lcd
+
+  # ── Pflanzendaten bei Home Assistant anfordern ───────────
+  # Direkt in on_client_connected zu feuern reicht NICHT: zu dem
+  # Zeitpunkt steht die Verbindung zwar, der Client hat die Actions
+  # aber noch nicht abonniert, und die API verwirft das Event mit
+  #   "client has not subscribed to actions (yet)"
+  # (auf Hardware beobachtet, nicht theoretisch).
+  #
+  # Deshalb verzoegert und wiederholt, bis Daten da sind - das deckt
+  # zugleich den Fall ab, dass die HA-Automation beim ersten Versuch
+  # nicht lief. Nach sechs Versuchen ist Schluss, damit ein Geraet
+  # ohne passende Automation nicht dauerhaft Events schickt; der
+  # time_pattern-Trigger der Automation faengt es dann auf.
+  - id: request_plant_data
+    mode: restart
+    then:
+      - repeat:
+          count: 6
+          then:
+            - if:
+                condition:
+                  lambda: return id(plant_names).empty();
+                then:
+                  - delay: 10s
+                  - if:
+                      condition:
+                        lambda: return id(plant_names).empty();
+                      then:
+                        - homeassistant.event:
+                            event: esphome.plants_display_ready
+
+  # ── Eine Pflanze weiter ──────────────────────────────────
+  # Blaettert nur, wenn die Pflanzenseite auch wirklich sichtbar
+  # ist. Waehrend eines Sprachdialogs laeuft der Takt zwar weiter,
+  # springt aber nicht unbemerkt mehrere Pflanzen vor.
+  - id: plant_next
+    then:
+      - if:
+          condition:
+            and:
+              - lambda: return id(plant_names).size() > 1;
+              - lambda: |-
+                  return !id(init_in_progress) &&
+                         id(voice_assistant_phase) == ${voice_assist_idle_phase_id};
+          then:
+            - lambda: |-
+                id(plant_index) =
+                  (id(plant_index) + 1) % (int) id(plant_names).size();
+            - script.execute: draw_display
+
+  # ── Rotations-Timer ──────────────────────────────────────
+  # Eine Schleife statt einer Kette aus plant_next heraus: wuerde
+  # plant_next dieses Script neu starten, braeche es sich selbst
+  # mitten in der eigenen Aufrufkette ab. So kommt der Neustart
+  # immer von aussen - per Touch oder per set_plant.
+  #
+  # mode: restart, damit ein Tippen den Takt zuruecksetzt statt
+  # einen zweiten Timer zu starten. Die Schleifenbedingung beendet
+  # den Timer von selbst, sobald hoechstens eine Pflanze uebrig ist.
+  - id: plant_rotate_timer
+    mode: restart
+    then:
+      - while:
+          condition:
+            lambda: return id(plant_names).size() > 1;
+          then:
+            - delay: ${plant_rotation_interval}
+            - script.execute: plant_next
+
+  # ── Statuszeile: Position in der Rotation ────────────────
+  # Als eigenes Script, damit die Seiten-Lambda nur noch aufruft
+  # (spec: gemeinsames Mobiliar aus wiederverwendbaren Scripts).
+  #
+  # Aktiv gegen inaktiv unterscheidet sich in Farbe UND Radius -
+  # die Punktreihe muss auch bei gedimmtem Backlight noch lesbar
+  # sein, und c_disabled ist genau die Rolle fuer "nicht aktiv"
+  # (4.86:1 auf c_bg, deutlich ueber der 3:1-Grafikschwelle).
+  - id: draw_plant_status_strip
+    then:
+      - lambda: |-
+          const int n = (int) id(plant_names).size();
+          if (n <= 1) return;
+
+          const int cy = 232;   // Mitte des reservierten 225..240-Streifens
+          int i = id(plant_index);
+          if (i < 0 || i >= n) i = 0;
+
+          if (n <= ${plant_dots_max}) {
+            const int gap = 14;
+            const int start_x = (id(s3_box_lcd).get_width() - (n - 1) * gap) / 2;
+            for (int p = 0; p < n; p++) {
+              if (p == i) {
+                id(s3_box_lcd).filled_circle(start_x + p * gap, cy, 4,
+                                             id(c_text));
+              } else {
+                id(s3_box_lcd).filled_circle(start_x + p * gap, cy, 2,
+                                             id(c_disabled));
+              }
+            }
+          } else {
+            // Zu viele fuer Punkte - als Zaehler ausgeben.
+            id(s3_box_lcd).printf(id(s3_box_lcd).get_width() / 2, cy,
+                                  id(f_caption), id(c_text_dim),
+                                  id(c_bg), TextAlign::CENTER,
+                                  "%d/%d", i + 1, n);
+          }
+
+# ============================================================
+#  DISPLAY – die Pflanzenseite
+# ============================================================
+#  Eine Botschaft pro Seite: DIESE Pflanze und ihr Gieszustand.
+#  Aufbau in Lesereihenfolge (spec-Hierarchie):
+#
+#    Identity      wer            Pflanzenname, f_display, c_text_dim
+#    State         wie steht es   96px-Glyph + Giesszeit, f_display
+#    Qualifier     was noch       Alert-Zeile, 24px-Glyph + f_body
+#    Systemstatus  wo bin ich     Punktreihe im Statusstreifen
+#
+#  Zonen (320x240, 20px Aussenrand, unterste 15px Statusstreifen):
+#
+#     0,  0,320,240   Hintergrund      fill(c_bg)
+#    20, 20,280, 28   Identity         Name, linksbuendig
+#    112, 56, 96, 96  Hero             96x96-Glyph, arithmetisch zentriert
+#    20,156,280, 28   State            Giesszeit, zentriert
+#    20,190,280, 30   Qualifier        Glyph bei x=20, Text bei x=52
+#     0,225,320, 15   Systemstatus     Punkte bzw. "3/14"
+#
+#  Keine gerahmten Kaesten: auf einem schwarzen Panel trennt
+#  Kontrast, nicht Umrandung. Der frueher weisse Wert-Kasten war
+#  die hellste Flaeche des Schirms fuer einen Nebenwert - und bei
+#  gedimmtem Backlight abends eine Blendflaeche.
+display:
+  - id: !extend s3_box_lcd
+    pages:
+      - id: plant_page
+        lambda: |-
+          const int w = it.get_width();
+
+          it.fill(id(c_bg));
+
+          // Ohne Daten nie eine leere Flaeche zeigen. Regulaer faengt
+          // show_plants_screen diesen Fall vorher ab; dieser Zweig ist
+          // die Absicherung, falls die Seite doch direkt gezeigt wird.
+          if (id(plant_names).empty()) {
+            it.image(w / 2 - 48, 60, id(ic_water_unknown),
+                     id(c_disabled), id(c_bg));
+            it.printf(w / 2, 170, id(f_body), id(c_disabled),
+                      id(c_bg), TextAlign::TOP_CENTER,
+                      "%s", "Keine Pflanzendaten");
+            return;
+          }
+
+          int i = id(plant_index);
+          if (i < 0 || i >= (int) id(plant_names).size()) i = 0;
+
+          // Die Vektoren werden synchron gehalten; trotzdem defensiv
+          // lesen - ein Fehler in Render-Code friert den Schirm ein.
+          auto str_at = [](const std::vector<std::string> &v, int k) -> std::string {
+            return (k >= 0 && k < (int) v.size()) ? v[k] : std::string("");
+          };
+          auto int_at = [](const std::vector<int> &v, int k, int fallback) -> int {
+            return (k >= 0 && k < (int) v.size()) ? v[k] : fallback;
+          };
+
+          std::string name = str_at(id(plant_names), i);
+          std::string watering = str_at(id(plant_watering), i);
+          std::string alert = str_at(id(plant_alerts), i);
+          int level = int_at(id(plant_alert_levels), i, 0);
+          int water = int_at(id(plant_water_levels), i, 3);
+
+          // Ein Slot, den Home Assistant noch nicht gefuellt hat, ist
+          // nicht "gesund", sondern unbekannt: eigener Glyph, eigene
+          // Rolle (c_disabled), sichtbarer Platzhalter statt Leerzeile.
+          bool known = !name.empty() && water >= 0 && water <= 2;
+          if (name.empty()) name = "...";
+          if (watering.empty()) watering = "...";
+          if (!known) water = 3;
+
+          // ── Identity: der Pflanzenname ────────────────────
+          // Linksbuendig, weil Textzeilen linksbuendig laufen und nur
+          // Hero-Inhalt zentriert wird - sonst springt der Name bei
+          // jedem Wechsel horizontal.
+          it.printf(20, 20, id(f_display), id(c_text_dim),
+                    id(c_bg), TextAlign::TOP_LEFT,
+                    "%s", name.c_str());
+
+          // ── State: Hero-Glyph + Giesszeit ─────────────────
+          // Ein Asset je Zustand, aber die Zustaende unterscheiden
+          // sich in der SILHOUETTE, nicht nur in der Farbe. Das
+          // 96px-Glyph ist das einzige Element, das aus Raumdistanz
+          // traegt (70' auf 0,5 m, 35' auf 1 m).
+          esphome::image::Image *hero;
+          Color state_color;
+          switch (water) {
+            case 0:
+              hero = id(ic_water_ok);
+              state_color = id(c_ok);
+              break;
+            case 1:
+              hero = id(ic_water_soon);
+              state_color = id(c_warn);
+              break;
+            case 2:
+              hero = id(ic_water_due);
+              state_color = id(c_alarm);
+              break;
+            default:
+              hero = id(ic_water_unknown);
+              state_color = id(c_disabled);
+              break;
+          }
+
+          // Zweiter Farbwert ist Pflicht: er ist der Grund, auf den
+          // das Alphablending mischt. Ohne ihn faellt er auf Schwarz
+          // zurueck und jedes Glyph bekaeme einen dunklen Saum.
+          it.image(w / 2 - 48, 56, hero, state_color, id(c_bg));
+
+          it.printf(w / 2, 156, id(f_display), state_color,
+                    id(c_bg), TextAlign::TOP_CENTER,
+                    "%s", watering.c_str());
+
+          // ── Qualifier: die Alert-Zeile ────────────────────
+          // Glyph traegt die Dringlichkeit (Kreis gegen Dreieck),
+          // Text traegt den Inhalt in c_text - damit haengt die
+          // Unterscheidung Hinweis/dringend nicht an der Farbe.
+          if (level > 0 && !alert.empty()) {
+            auto glyph = (level >= 2) ? id(ic_alert_urgent)
+                                      : id(ic_alert_notice);
+            auto glyph_color = (level >= 2) ? id(c_alarm) : id(c_warn);
+            it.image(20, 193, glyph, glyph_color, id(c_bg));
+            it.printf(52, 197, id(f_body), id(c_text),
+                      id(c_bg), TextAlign::TOP_LEFT,
+                      "%s", alert.c_str());
+          }
+
+          // ── Systemstatus ──────────────────────────────────
+          id(draw_plant_status_strip).execute();

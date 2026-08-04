@@ -43,6 +43,18 @@ substitutions:
   font_glyphsets: "GF_Latin_Core"
   font_family: Figtree
 
+  # Erweiterungspunkt: welches Script den Idle-Zustand auf den Schirm bringt.
+  # Ein Device, das eine eigene Idle-Anzeige mitbringt (z.B.
+  # plants-display.yaml), setzt diese Substitution auf sein eigenes Script.
+  # Ohne Override bleibt es bei show_idle_screen, also beim Casita-Idle-Bild
+  # und damit beim bisherigen Verhalten.
+  #
+  # Ein Script statt einer Seiten-ID, weil eine alternative Idle-Anzeige in
+  # der Regel selbst noch entscheiden muss, ob sie schon etwas anzuzeigen hat
+  # - und diese Entscheidung gehoert in genau einen Umschaltpunkt, nicht in
+  # eine Seiten-Lambda.
+  idle_screen_script: show_idle_screen
+
   # Erlaubte Sonderzeichen für Fonts
   allowed_characters: " !#%'()+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWYZ[]_abcdefghijklmnopqrstuvwxyz{|}°²³µ¿ÁÂÄÅÉÖÚßàáâãäåæçèéêëìíîðñòóôõöøùúûüýþāăąćčďĐđēėęěğĮįıļľŁłńňőřśšťũūůűųźŻżŽžơưșțΆΈΌΐΑΒΓΔΕΖΗΘΚΜΝΠΡΣΤΥΦάέήίαβγδεζηθικλμνξοπρςστυφχψωϊόύώАБВГДЕЖЗИКЛМНОПРСТУХЦЧШЪЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяёђєіїјљњћאבגדהוזחטיכלםמןנסעפץצקרשת،ءآأإئابةتجحخدذرزسشصضطظعغفقكلمنهوىيٹپچڈکگںھہیے"
 
@@ -926,8 +938,7 @@ script:
                                       id(s3_box_lcd).update();
                                       break;
                                     default:
-                                      id(s3_box_lcd).show_page(idle_page);
-                                      id(s3_box_lcd).update();
+                                      id(${idle_screen_script}).execute();
                                   }
                             else:
                               - display.page.show: no_ha_page
@@ -938,6 +949,16 @@ script:
           else:
             - display.page.show: initializing_page
             - component.update: s3_box_lcd
+
+  # ── Idle-Anzeige (Standard) ──────────────────────────────
+  # Aufgerufen aus dem default-Zweig von draw_display, ueber die
+  # Substitution ${idle_screen_script}. Wer eine andere Idle-Anzeige will,
+  # liefert ein eigenes Script mit derselben Aufgabe und setzt die
+  # Substitution um - draw_display bleibt unveraendert.
+  - id: show_idle_screen
+    then:
+      - display.page.show: idle_page
+      - component.update: s3_box_lcd
 
   # ── Wake Word starten ────────────────────────────────────
   - id: start_wake_word

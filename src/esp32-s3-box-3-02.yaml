@@ -4,6 +4,13 @@ substitutions:
   id: esp32_s3_box_3_02
   comment: "esp32-s3-box-3 02"
 
+  # Leitet den Idle-Zustand auf die Pflanzenanzeige um. Voice Assistant,
+  # Timer und Pixel Art bleiben unveraendert und haben weiter Vorrang -
+  # die Pflanzen ersetzen nur das Casita-Idle-Bild.
+  idle_screen_script: show_plants_screen
+
 packages:
   plug: !include
     file: common/esp32-s3-box-3-draw.yaml
+  plants: !include
+    file: common/plants-display.yaml
