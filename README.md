@@ -1,6 +1,6 @@
 # esphome-configs
 
-[![Static continuous integration tests](https://github.com/nolte/esphome-configs/actions/workflows/build-static-tests.yaml/badge.svg)](https://github.com/nolte/esphome-configs/actions/workflows/build-static-tests.yaml)
+[![Static CI Tests](https://github.com/nolte/esphome-configs/actions/workflows/build-static-tests.yaml/badge.svg)](https://github.com/nolte/esphome-configs/actions/workflows/build-static-tests.yaml)
 
 A duplication-free collection of [ESPHome](https://esphome.io/) device configurations for
 do-it-yourself smart-home makers running a self-hosted
@@ -109,9 +109,11 @@ Per-device and per-package documentation lives under `docs/`, and MkDocs builds 
 task mkdocs:start   # live preview on http://localhost:8002
 ```
 
-The `name` and `id` substitutions of a device determine the entity IDs Home Assistant sees.
-Renaming them breaks every automation and dashboard that references the old IDs, so treat them as a
-published contract rather than a local detail.
+The `name` substitution determines the entity IDs Home Assistant sees, and the address that
+over-the-air updates resolve (`use_address` in `common/base.yaml`). Renaming it breaks every
+automation and dashboard that references the old IDs, so treat it as a published contract rather
+than a local detail. The `id` substitution stays inside ESPHome: it names components so the config
+can cross-reference them, as in `switch.toggle: ${id}_button_switch`.
 
 ## Structure
 
