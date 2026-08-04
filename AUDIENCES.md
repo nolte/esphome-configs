@@ -1,4 +1,4 @@
-# Audiences—esphome-configs
+# Audiences—`esphome-configs`
 
 <!--
 Produced via the `audience-identify` skill, following
@@ -31,7 +31,7 @@ Explicitly outside the context:
 ## Audiences
 
 Each entry: label, relationship category, interaction surface, expectation, documentation `track`
-(`user-docs` or `developer-docs` per spec/project/docs-audience-tracks/), open questions,
+(`user-docs` or `developer-docs` per `spec/project/docs-audience-tracks/`), open questions,
 `confirmed` or `assumed`, criticality (primary / secondary / peripheral).
 
 ### Direct consumers
@@ -101,7 +101,7 @@ Each entry: label, relationship category, interaction surface, expectation, docu
   documented for the operator maintaining those automations) · _status_: `assumed` ·
   _criticality_: primary
   - Open questions: no inventory records which entities the automations outside this repository
-    reference, so the blast radius of a rename stays unknown.
+    reference, so the impact of a rename stays unknown.
 
 ## Open questions (cross-cutting)
 
