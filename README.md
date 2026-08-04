@@ -58,7 +58,7 @@ substitutions. These fragments ship only as part of this repository, not as a ve
 - [`pass`](https://www.passwordstore.org/): supplies Wi-Fi secrets to the build
   (`network/wifi/ssid`, `network/wifi/password`).
 - `jq`: only for the Ansible / NetBox inventory path below.
-- The target device on `/dev/ttyUSB0` for the first, serial flash; later updates go over the air.
+- The target device on `/dev/ttyUSB0` for the first, serial flash. Later updates go over the air.
 
 ### Compile and flash
 
