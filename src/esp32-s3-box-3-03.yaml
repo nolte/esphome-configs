@@ -1,0 +1,15 @@
+---
+substitutions:
+  name: esp32-s3-box-3-03
+  id: esp32_s3_box_3_03
+  comment: "esp32-s3-box-3 03 - Pflanzen-Display"
+
+  # Leitet den Idle-Zustand von draw_display auf die Pflanzenanzeige um.
+  # Ohne diese Zeile bleibt es beim Casita-Idle-Bild.
+  idle_screen_script: show_plants_screen
+
+packages:
+  plug: !include
+    file: common/esp32-s3-box-3-draw.yaml
+  plants: !include
+    file: common/plants-display.yaml

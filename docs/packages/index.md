@@ -11,3 +11,4 @@ mechanism.
 - [Cancelable timer](timer-cancelable.md)
 - [Kill sensor](switch-kill-sensor.md)
 - [Pixel art](pixel_art.md)
+- [Plants display](plants-display.md)
