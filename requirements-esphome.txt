@@ -9,4 +9,4 @@
 # Kept in its own file rather than inline in the workflow so Renovate's
 # pip_requirements manager picks it up, the same way it already maintains
 # requirements-dev.txt.
-esphome==2026.7.3
+esphome==2026.8.2
