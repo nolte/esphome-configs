@@ -12,19 +12,19 @@ concurrency:
 
 jobs:
   static:
-    uses: nolte/gh-plumbing/.github/workflows/reusable-pre-commit.yaml@d51e51ec3ec17ceea09fe9eb40ac00857b6fa1be # v2.0.0
+    uses: nolte/gh-plumbing/.github/workflows/reusable-pre-commit.yaml@3fccbb333146cd2a65902afd7394db870ae6a978 # v2.1.0
     permissions:
       contents: read
 
   security:
-    uses: nolte/gh-plumbing/.github/workflows/reusable-trivy.yaml@d51e51ec3ec17ceea09fe9eb40ac00857b6fa1be # v2.0.0
+    uses: nolte/gh-plumbing/.github/workflows/reusable-trivy.yaml@3fccbb333146cd2a65902afd7394db870ae6a978 # v2.1.0
     permissions:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
       actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
 
   chain-bench:
-    uses: nolte/gh-plumbing/.github/workflows/reusable-chain-bench.yaml@d51e51ec3ec17ceea09fe9eb40ac00857b6fa1be # v2.0.0
+    uses: nolte/gh-plumbing/.github/workflows/reusable-chain-bench.yaml@3fccbb333146cd2a65902afd7394db870ae6a978 # v2.1.0
     permissions:
       contents: read
     secrets:
