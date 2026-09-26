@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   publish:
-    uses: nolte/gh-plumbing/.github/workflows/reusable-release-publish.yml@d51e51ec3ec17ceea09fe9eb40ac00857b6fa1be # v2.0.0
+    uses: nolte/gh-plumbing/.github/workflows/reusable-release-publish.yml@80cb5ebb91a3b49126729de31b1037f11c34b5cd # v2.2.0
     with:
       tag: ${{ inputs.tag }}
       dry_run: ${{ inputs.dry_run }}
