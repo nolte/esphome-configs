@@ -8,4 +8,4 @@ permissions:
 
 jobs:
   spelling:
-    uses: nolte/gh-plumbing/.github/workflows/reusable-spelling-vale.yaml@d51e51ec3ec17ceea09fe9eb40ac00857b6fa1be # v2.0.0
+    uses: nolte/gh-plumbing/.github/workflows/reusable-spelling-vale.yaml@80cb5ebb91a3b49126729de31b1037f11c34b5cd # v2.2.0
